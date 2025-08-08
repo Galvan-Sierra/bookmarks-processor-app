@@ -2,6 +2,13 @@
   "name": "bookmarks-processor-app",
   "module": "index.ts",
   "type": "module",
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "dev": "bun --watch src/index.ts",
+    "test": "bun test",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "bun build src/index.ts --outdir dist"
+  },
   "devDependencies": {
     "bun-types": "latest"
   },
