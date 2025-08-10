@@ -1,6 +1,7 @@
 import { Bookmark } from '@type/bookmark';
 import { HTMLParser } from '@parsers/html-parser';
 import { FileHandler } from '@utils/file-handler';
+import { DEFAULT_OUTPUT_PATH } from '@config/constants';
 
 export class BookmarkProcess {
   private path: string;
@@ -43,6 +44,25 @@ export class BookmarkProcess {
       console.log(`📝 Se ha guardado el archivo original`);
     } catch (error) {
       throw new Error(`No se pudo guardar el archivo: ${error}`);
+    }
+  }
+
+  async saveOutput(fileName: string, bookmarks: Bookmark[]): Promise<void> {
+    if (bookmarks.length === 0) {
+      console.warn(`⚠ No hay marcadores para guardar en ${fileName}`);
+      return;
+    }
+
+    try {
+      const content = this.parser.serialize(fileName, bookmarks);
+      await this.handler.write(
+        `${DEFAULT_OUTPUT_PATH}/${fileName}.html`,
+        content
+      );
+      console.log(`📝 Se ha guardado el archivo de salida: ${fileName}.html`);
+    } catch (error) {
+      console.error(`❌ Error al guardar el archivo de salida: ${error}`);
+      throw new Error(`No se pudo guardar el archivo de salida: ${error}`);
     }
   }
 

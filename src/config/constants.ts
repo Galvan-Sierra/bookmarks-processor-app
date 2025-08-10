@@ -11,3 +11,5 @@ export const HTML_TEMPLATE = (
     <DT><H3 PERSONAL_TOOLBAR_FOLDER="true">Marcadores</H3>
     <DL><p>
 `;
+
+export const DEFAULT_OUTPUT_PATH = './data/output';
