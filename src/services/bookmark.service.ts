@@ -89,4 +89,14 @@ export class BookmarkService {
       return updated || bookmark;
     });
   }
+
+  deleteDuplicates<Bookmarks, K extends keyof Bookmarks>(
+    elements: Bookmarks[],
+    param: K
+  ): Bookmarks[] {
+    const map = new Map<Bookmarks[K], Bookmarks>();
+    return elements.filter(
+      (element) => !map.has(element[param]) && map.set(element[param], element)
+    );
+  }
 }

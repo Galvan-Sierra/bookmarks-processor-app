@@ -88,6 +88,40 @@ export class BookmarkProcess {
     );
   }
 
+  extractBy(options: SearchOptions): Bookmark[] {
+    const extractedBookmarks = this.service.findBookmarksBy(
+      this.bookmarks,
+      options
+    );
+
+    if (extractedBookmarks.length > 0) {
+      this.removeBookmarks(extractedBookmarks);
+      const searchType = options.useRegex ? 'regex' : 'palabras clave';
+      console.log(
+        `✅ Marcadores extraídos ${extractedBookmarks.length} con ${searchType}`
+      );
+    }
+
+    return extractedBookmarks;
+  }
+
+  removeDuplicates(param: keyof Bookmark) {
+    const originalCount = this.bookmarks.length;
+    this.bookmarks = this.service.deleteDuplicates(this.bookmarks, param);
+
+    const duplicatesRemoved = originalCount - this.bookmarks.length;
+    console.log(
+      `🗑️ Se han eliminado ${duplicatesRemoved} duplicados por ${param}`
+    );
+  }
+
+  private removeBookmarks(bookmarksToRemove: Bookmark[]): void {
+    const urlsToRemove = new Set(bookmarksToRemove.map((b) => b.url));
+    this.bookmarks = this.bookmarks.filter(
+      (bookmark) => !urlsToRemove.has(bookmark.url)
+    );
+  }
+
   private ensureInitialized(): void {
     if (!this.isLoaded) {
       throw new Error(
