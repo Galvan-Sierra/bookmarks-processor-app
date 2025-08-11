@@ -69,9 +69,23 @@ export class BookmarkProcess {
     }
   }
 
+  getBookmarks(): Bookmark[] {
+    this.ensureInitialized();
+    return this.bookmarks;
+  }
+
   findBookmarksBy(options: SearchOptions): Bookmark[] {
     this.ensureInitialized();
     return this.service.findBookmarksBy(this.bookmarks, options);
+  }
+
+  updateBookmarks(updates: Bookmark[], param: keyof Bookmark): void {
+    this.ensureInitialized();
+    const updatedBookmarks = this.service.updateBookmarks(
+      this.bookmarks,
+      updates,
+      param
+    );
   }
 
   private ensureInitialized(): void {

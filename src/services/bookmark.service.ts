@@ -76,4 +76,17 @@ export class BookmarkService {
       }
     });
   }
+
+  updateBookmarks(
+    bookmarks: Bookmark[],
+    updates: Bookmark[],
+    param: keyof Bookmark
+  ): Bookmark[] {
+    return bookmarks.map((bookmark) => {
+      const updated = updates.find(
+        (update) => update[param] === bookmark[param]
+      );
+      return updated || bookmark;
+    });
+  }
 }
