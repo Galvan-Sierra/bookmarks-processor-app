@@ -1,7 +1,8 @@
-import { Bookmark } from '@type/bookmark';
+import { Bookmark, SearchOptions } from '@type/bookmark';
 import { HTMLParser } from '@parsers/html-parser';
 import { FileHandler } from '@utils/file-handler';
 import { DEFAULT_OUTPUT_PATH } from '@config/constants';
+import { BookmarkService } from '@services/bookmark.service';
 
 export class BookmarkProcess {
   private path: string;
@@ -11,6 +12,7 @@ export class BookmarkProcess {
   // dependencias
   private handler: FileHandler;
   private parser: HTMLParser;
+  private service: BookmarkService;
 
   constructor(path: string) {
     this.path = path;
@@ -18,6 +20,7 @@ export class BookmarkProcess {
     // dependencias
     this.handler = new FileHandler();
     this.parser = new HTMLParser();
+    this.service = new BookmarkService();
   }
 
   async start(): Promise<void> {
@@ -64,6 +67,11 @@ export class BookmarkProcess {
       console.error(`❌ Error al guardar el archivo de salida: ${error}`);
       throw new Error(`No se pudo guardar el archivo de salida: ${error}`);
     }
+  }
+
+  findBookmarksBy(options: SearchOptions): Bookmark[] {
+    this.ensureInitialized();
+    return this.service.findBookmarksBy(this.bookmarks, options);
   }
 
   private ensureInitialized(): void {
