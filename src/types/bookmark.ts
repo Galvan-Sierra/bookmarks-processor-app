@@ -1,3 +1,7 @@
 export interface Bookmark {
-  // TODO: Define bookmark properties
+  title: string;
+  href: string;
+  folder: string;
+  icon?: string;
+  addDate?: number;
 }
