@@ -19,8 +19,8 @@ export class BookmarkManager {
 
       this.isLoaded = true;
       console.log(`📚 Se han cargado ${bookmarks.length} marcadores`);
-    } catch (error) {
-      console.error(`No se leer el archivo de marcadores: ${error}`);
+    } catch (error: any) {
+      console.error(`⚠ ${error.message}`);
     }
   }
 
@@ -33,13 +33,13 @@ export class BookmarkManager {
       await this.fileHandler.write(this.path, content);
 
       console.log(`📝 Se ha guardado el archivo original`);
-    } catch (error) {
-      console.error(`⚠ No se pudo guardar el archivo: ${error}`);
+    } catch (error: any) {
+      console.error(`⚠ ${error.message}`);
     }
   }
 
   private validateLoaded(): void {
     if (!this.isLoaded)
-      throw new Error('Bookmarks not loaded. Call read() first.');
+      throw new Error('Bookmarks not loaded. Call read() first.').message;
   }
 }
