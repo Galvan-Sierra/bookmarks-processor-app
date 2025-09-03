@@ -2,7 +2,9 @@ export class FileHandler {
   async read(path: string): Promise<string> {
     const file = Bun.file(path);
 
-    if (!file.exists()) throw new Error(`El archivo ${path} no existe`);
+    if (!(await file.exists())) {
+      throw new Error(`El archivo ${path} no existe`);
+    }
 
     try {
       const content = await file.text();
