@@ -1,7 +1,11 @@
 export class FileHandler {
   async read(path: string): Promise<string> {
+    const file = Bun.file(path);
+
+    if (!file.exists()) throw new Error(`El archivo ${path} no existe`);
+
     try {
-      const content = await Bun.file(path).text();
+      const content = await file.text();
       return content;
     } catch (error) {
       throw new Error(
@@ -17,7 +21,9 @@ export class FileHandler {
       await Bun.write(path, data);
     } catch (error) {
       throw new Error(
-        `No se pudo guardar el archivo: ${path}. ${(error as Error)?.message}`
+        `No se pudo guardar el archivo: ${path}}. ${
+          error instanceof Error ? error.message : 'Error desconocido'
+        }`
       );
     }
   }
