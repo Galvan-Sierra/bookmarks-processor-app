@@ -5,3 +5,14 @@ export interface Bookmark {
   icon?: string;
   addDate?: number;
 }
+
+export interface SearchOptions {
+  includeWords: string[] | string;
+  excludeWords?: string[];
+  caseSensitive?: boolean;
+  searchInHref?: boolean;
+  searchInTitle?: boolean;
+  searchInFolder?: boolean;
+  useRegex?: boolean;
+  regexFlags?: string;
+}
