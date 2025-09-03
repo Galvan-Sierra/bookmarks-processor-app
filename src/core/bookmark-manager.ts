@@ -38,6 +38,16 @@ export class BookmarkManager {
     }
   }
 
+  async delete(): Promise<void> {
+    try {
+      await this.fileHandler.delete(this.path);
+
+      console.log(`📝 Se ha eliminado el archivo ${this.path}`);
+    } catch (error) {
+      console.error(`⚠ ${error}`);
+    }
+  }
+
   private validateLoaded(): void {
     if (!this.isLoaded)
       throw new Error('Bookmarks not loaded. Call read() first.').message;

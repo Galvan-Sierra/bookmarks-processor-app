@@ -1,3 +1,5 @@
+import { rm } from 'node:fs/promises';
+
 export class FileHandler {
   async read(path: string): Promise<string> {
     const file = Bun.file(path);
@@ -26,6 +28,16 @@ export class FileHandler {
         `No se pudo guardar el archivo: ${path}}. ${
           error instanceof Error ? error.message : 'Error desconocido'
         }`
+      );
+    }
+  }
+
+  async delete(path: string): Promise<void> {
+    try {
+      await rm(path, { force: true });
+    } catch (error: any) {
+      throw new Error(
+        `No se pudo eliminar el archivo: ${path}.  ${error.message}`
       );
     }
   }
