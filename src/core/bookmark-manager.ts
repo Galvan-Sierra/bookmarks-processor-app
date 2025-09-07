@@ -24,4 +24,23 @@ export class BookmarkManager {
       console.error(`⚠ ${error.message}`);
     }
   }
+
+  async save(): Promise<void> {
+    this.validateLoaded();
+
+    try {
+      const bookmarks = this.bookmarkService.get();
+      const content = this.parser.serialize(bookmarks);
+      await this.fileHandler.writeFile(this.path, content);
+
+      console.log(`📝 Se ha guardado el archivo original`);
+    } catch (error: any) {
+      console.error(`⚠ ${error.message}`);
+    }
+  }
+
+  private validateLoaded(): void {
+    if (!this.isLoaded)
+      throw new Error('Bookmarks not loaded. Call read() first.').message;
+  }
 }
