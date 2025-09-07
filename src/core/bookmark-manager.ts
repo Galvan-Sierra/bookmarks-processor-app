@@ -45,6 +45,10 @@ export class BookmarkManager {
     }
   }
 
+  getBookmarks(): Bookmark[] {
+    return this.bookmarkService.getAll();
+  }
+
   findBookmarksBy(options: SearchOptions): Bookmark[] {
     this.validateBookmarksLoaded();
 
@@ -75,6 +79,15 @@ export class BookmarkManager {
     return extracted;
   }
 
+  deleteBookmarks(bookmarksToDelete: Bookmark[]): void {
+    const initialCount = this.bookmarkService.getAll().length;
+
+    this.bookmarkService.remove(bookmarksToDelete);
+
+    const deletedCount = initialCount - this.bookmarkService.getAll().length;
+
+    console.log(`🗑️ ${deletedCount} bookmarks deleted`);
+  }
   private validateBookmarksLoaded(): void {
     if (!this.isLoaded) {
       throw new Error(
