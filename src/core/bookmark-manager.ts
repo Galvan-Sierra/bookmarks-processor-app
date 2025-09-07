@@ -1,6 +1,5 @@
 import { HtmlParser } from '@parsers/html-parser';
 import { BookmarkService } from '@services/bookmark.service';
-import type { Bookmark } from '@type/bookmark';
 import { FileHandler } from '@utils/file-handler';
 
 export class BookmarkManager {
@@ -12,45 +11,44 @@ export class BookmarkManager {
 
   constructor(private path: string) {}
 
-  async read(): Promise<void> {
+  async readBookmarks(): Promise<void> {
     try {
-      const content = await this.fileHandler.readFile(this.path);
-      const bookmarks = this.parser.parse(content);
-      this.bookmarkService.add(bookmarks);
+      const fileContent = await this.fileHandler.readFile(this.path);
+      const parsedBookmarks = this.parser.parse(fileContent);
+      this.bookmarkService.add(parsedBookmarks);
 
       this.isLoaded = true;
-      console.log(`📚 Se han cargado ${bookmarks.length} marcadores`);
+      console.log(`📚 Se han cargado ${parsedBookmarks.length} marcadores`);
     } catch (error: any) {
       console.error(`⚠ ${error.message}`);
     }
   }
 
-  async save(): Promise<void> {
-    this.validateLoaded();
+  async saveBookmarks(): Promise<void> {
+    this.validateBookmarksLoaded();
 
     try {
       const bookmarks = this.bookmarkService.get();
-      const content = this.parser.serialize(bookmarks);
-      await this.fileHandler.writeFile(this.path, content);
-
-      console.log(`📝 Se ha guardado el archivo original`);
+      const htmlContent = this.parser.serialize(bookmarks);
+      await this.fileHandler.writeFile(this.path, htmlContent);
     } catch (error: any) {
-      console.error(`⚠ ${error.message}`);
+      console.error(error.message);
     }
   }
 
-  async delete(): Promise<void> {
+  async deleteFile(): Promise<void> {
     try {
       await this.fileHandler.deleteFile(this.path);
-
-      console.log(`📝 Se ha eliminado el archivo ${this.path}`);
-    } catch (error: any) {
-      console.error(`⚠ ${error.message}`);
+    } catch (error) {
+      throw new Error(`Failed to delete file: ${error}`);
     }
   }
 
-  private validateLoaded(): void {
-    if (!this.isLoaded)
-      throw new Error('Bookmarks not loaded. Call read() first.').message;
+  private validateBookmarksLoaded(): void {
+    if (!this.isLoaded) {
+      throw new Error(
+        'Bookmarks not loaded. Please call readBookmarks() first.'
+      );
+    }
   }
 }
