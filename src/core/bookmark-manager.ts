@@ -49,6 +49,22 @@ export class BookmarkManager {
     return this.bookmarkService.getAll();
   }
 
+  addBookmarks(newBookmarks: Bookmark[]): void {
+    const initialBookmarkCount = this.bookmarkService.getAll().length;
+
+    try {
+      this.bookmarkService.add(newBookmarks);
+
+      const addedBookmarkCount =
+        this.bookmarkService.getAll().length - initialBookmarkCount;
+
+      console.log(`➕ Se han agregado ${addedBookmarkCount} marcadores`);
+    } catch (error) {
+      console.error(`❌ Error al agregar marcadores: ${error}`);
+      throw error;
+    }
+  }
+
   findBookmarksBy(options: SearchOptions): Bookmark[] {
     this.validateBookmarksLoaded();
 
