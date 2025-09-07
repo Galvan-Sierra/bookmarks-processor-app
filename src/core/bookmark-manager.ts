@@ -1,5 +1,6 @@
 import { HtmlParser } from '@parsers/html-parser';
 import { BookmarkService } from '@services/bookmark.service';
+import type { Bookmark, SearchOptions } from '@type/bookmark';
 import { FileHandler } from '@utils/file-handler';
 
 export class BookmarkManager {
@@ -44,6 +45,18 @@ export class BookmarkManager {
     }
   }
 
+  findBookmarksBy(options: SearchOptions): Bookmark[] {
+    this.validateBookmarksLoaded();
+
+    const results = this.bookmarkService.findBy(options);
+    const searchType = options.useRegex ? 'regex' : 'palabras clave';
+
+    console.log(
+      `🔍 Se han encontrado ${results.length} marcadores con ${searchType}`
+    );
+
+    return results;
+  }
   private validateBookmarksLoaded(): void {
     if (!this.isLoaded) {
       throw new Error(
