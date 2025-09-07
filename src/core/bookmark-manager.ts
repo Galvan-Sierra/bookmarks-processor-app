@@ -29,7 +29,7 @@ export class BookmarkManager {
     this.validateBookmarksLoaded();
 
     try {
-      const bookmarks = this.bookmarkService.get();
+      const bookmarks = this.bookmarkService.getAll();
       const htmlContent = this.parser.serialize(bookmarks);
       await this.fileHandler.writeFile(this.path, htmlContent);
     } catch (error: any) {
@@ -57,6 +57,24 @@ export class BookmarkManager {
 
     return results;
   }
+
+  extractBookmarksBy(options: SearchOptions): Bookmark[] {
+    this.validateBookmarksLoaded();
+
+    const extracted = this.bookmarkService.extractBy(options);
+    const searchType = options.useRegex ? 'regex' : 'keywords';
+
+    if (extracted.length > 0) {
+      console.log(
+        `✅ Extracted ${extracted.length} bookmarks using ${searchType}`
+      );
+    } else {
+      console.log('ℹ️ No bookmarks found to extract');
+    }
+
+    return extracted;
+  }
+
   private validateBookmarksLoaded(): void {
     if (!this.isLoaded) {
       throw new Error(

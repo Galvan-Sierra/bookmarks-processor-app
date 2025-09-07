@@ -15,7 +15,7 @@ export class BookmarkService {
     });
   }
 
-  get(): Bookmark[] {
+  getAll(): Bookmark[] {
     return [...this.bookmarks];
   }
 
@@ -65,6 +65,26 @@ export class BookmarkService {
         );
       }
     });
+  }
+
+  extractBy(options: SearchOptions): Bookmark[] {
+    const bookmarksToRemove = this.findBy(options);
+
+    if (bookmarksToRemove.length > 0) {
+      this.remove(bookmarksToRemove);
+    }
+
+    return bookmarksToRemove;
+  }
+
+  remove(bookmarksToRemove: Bookmark[]): void {
+    const hrefsToRemove = new Set(
+      bookmarksToRemove.map((bookmark) => bookmark.href)
+    );
+
+    this.bookmarks = this.bookmarks.filter(
+      (bookmark) => !hrefsToRemove.has(bookmark.href)
+    );
   }
 
   private matchWithRegex(
