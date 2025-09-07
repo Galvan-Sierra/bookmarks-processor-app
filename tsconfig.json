@@ -28,7 +28,7 @@
     "paths": {
       "@core/*": ["src/core/*"],
       "@config/*": ["src/config/*"],
-      "@types/*": ["src/types/*"],
+      "@type/*": ["src/types/*"],
       "@parsers/*": ["src/parsers/*"],
       "@services/*": ["src/services/*"],
       "@utils/*": ["src/utils/*"],
