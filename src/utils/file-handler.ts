@@ -1,3 +1,5 @@
+import { rm } from 'node:fs/promises';
+
 export class FileHandler {
   async readFile(filePath: string): Promise<string> {
     const file = Bun.file(filePath);
@@ -18,6 +20,14 @@ export class FileHandler {
       await Bun.write(filePath, fileContent);
     } catch (error) {
       throw new Error(`Failed to write file: ${error}`);
+    }
+  }
+
+  async deleteFile(filePath: string): Promise<void> {
+    try {
+      await rm(filePath, { recursive: true, force: true });
+    } catch (error) {
+      throw new Error(`Failed to delete file: ${error}`);
     }
   }
 }
