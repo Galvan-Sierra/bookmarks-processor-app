@@ -78,13 +78,17 @@ export class BookmarkService {
   }
 
   remove(bookmarksToRemove: Bookmark[]): void {
-    const hrefsToRemove = new Set(
-      bookmarksToRemove.map((bookmark) => bookmark.href)
-    );
+    const bookmarksToRemoveSet = new Set(bookmarksToRemove.map((b) => b.href));
 
     this.bookmarks = this.bookmarks.filter(
-      (bookmark) => !hrefsToRemove.has(bookmark.href)
+      (bookmark) => !bookmarksToRemoveSet.has(bookmark.href)
     );
+
+    bookmarksToRemoveSet.forEach((href) => this.hrefSet.delete(href));
+  }
+
+  private byHref(bookmark: Bookmark): string {
+    return bookmark.href;
   }
 
   private matchWithRegex(
