@@ -1,3 +1,4 @@
+import { DEFAULT_OUTPUT_PATH } from '@config/constants';
 import { HtmlParser } from '@parsers/html-parser';
 import { BookmarkService } from '@services/bookmark.service';
 import type { Bookmark, SearchOptions } from '@type/bookmark';
@@ -34,6 +35,26 @@ export class BookmarkManager {
       await this.fileHandler.writeFile(this.path, htmlContent);
     } catch (error: any) {
       console.error(error.message);
+    }
+  }
+
+  async saveOutputBookmarks(
+    fileName: string,
+    bookmarksToSave: Bookmark[]
+  ): Promise<void> {
+    if (bookmarksToSave.length === 0) {
+      console.warn(`⚠ No hay marcadores para guardar en ${fileName}`);
+      return;
+    }
+
+    const outputPath = `${DEFAULT_OUTPUT_PATH}${fileName}.html`;
+
+    try {
+      const fileContent = this.parser.serialize(bookmarksToSave);
+      await this.fileHandler.writeFile(outputPath, fileContent);
+      console.log(`📝 Se ha guardado el archivo de salida: ${fileName}.html`);
+    } catch (error) {
+      throw new Error(`Failed to export bookmarks: ${error}`);
     }
   }
 

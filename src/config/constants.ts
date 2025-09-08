@@ -11,3 +11,5 @@ export const HTML_TEMPLATE = `
     <DL><p>
     </DL><p>
 `;
+
+export const DEFAULT_OUTPUT_PATH = './data/output/';
