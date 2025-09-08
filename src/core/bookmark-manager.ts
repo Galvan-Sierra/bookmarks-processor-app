@@ -70,16 +70,16 @@ export class BookmarkManager {
     return this.bookmarkService.getAll();
   }
 
-  addBookmarks(newBookmarks: Bookmark[]): void {
-    const initialBookmarkCount = this.bookmarkService.getAll().length;
+  addBookmarks(newBookmarks: Bookmark[], folderName?: string): void {
+    const initialCount = this.bookmarkService.getAll().length;
 
     try {
-      this.bookmarkService.add(newBookmarks);
+      this.bookmarkService.add(newBookmarks, folderName);
+      const addedCount = this.bookmarkService.getAll().length - initialCount;
 
-      const addedBookmarkCount =
-        this.bookmarkService.getAll().length - initialBookmarkCount;
-
-      console.log(`➕ Se han agregado ${addedBookmarkCount} marcadores`);
+      if (addedCount > 0) {
+        console.log(`➕ Se han agregados ${addedCount} marcadores`);
+      }
     } catch (error) {
       console.error(`❌ Error al agregar marcadores: ${error}`);
       throw error;

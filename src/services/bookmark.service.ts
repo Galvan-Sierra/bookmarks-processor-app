@@ -4,15 +4,21 @@ export class BookmarkService {
   private bookmarks: Bookmark[] = [];
   private hrefSet: Set<string> = new Set();
 
-  add(bookmarks: Bookmark[]): void {
-    if (bookmarks.length === 0) return;
+  add(newBookmarks: Bookmark[], folderName?: string): void {
+    const newHrefs = new Set<string>();
 
-    bookmarks.forEach((bookmark) => {
-      if (!this.exists(bookmark.href)) {
-        this.hrefSet.add(bookmark.href);
-        this.bookmarks.push(bookmark);
+    for (const newBookmark of newBookmarks) {
+      if (!this.exists(newBookmark.href)) {
+        newHrefs.add(newBookmark.href);
+
+        if (folderName) newBookmark.folder = folderName;
       }
-    });
+    }
+
+    if (newHrefs.size > 0) {
+      this.bookmarks.push(...newBookmarks.filter((b) => newHrefs.has(b.href)));
+      this.hrefSet = new Set([...this.hrefSet, ...newHrefs]);
+    }
   }
 
   getAll(): Bookmark[] {
