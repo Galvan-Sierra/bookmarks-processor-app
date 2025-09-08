@@ -87,8 +87,42 @@ export class BookmarkService {
     bookmarksToRemoveSet.forEach((href) => this.hrefSet.delete(href));
   }
 
-  private byHref(bookmark: Bookmark): string {
-    return bookmark.href;
+  clear(): void {
+    this.bookmarks = [];
+    this.hrefSet = new Set();
+  }
+
+  orderByDomain(): Bookmark[] {
+    this.bookmarks = this.sortBookmarksByDomainFrequency(this.bookmarks);
+    return [...this.bookmarks]; // Retorna copia para inmutabilidad
+  }
+
+  extractDomain(url: string): string {
+    try {
+      return new URL(url).hostname;
+    } catch {
+      console.warn(`Invalid URL detected: ${url}`);
+      return 'invalid-url';
+    }
+  }
+
+  private sortBookmarksByDomainFrequency(bookmarks: Bookmark[]): Bookmark[] {
+    if (!bookmarks?.length) return [];
+
+    return Object.entries(
+      Object.groupBy(bookmarks, (bookmark) => bookmark.folder)
+    ).flatMap(([, folderBookmarks]) => {
+      const domainGroups = Object.groupBy(
+        folderBookmarks as Bookmark[],
+        (bookmark) => this.extractDomain(bookmark.href)
+      );
+
+      return Object.entries(domainGroups)
+        .sort(
+          ([, a], [, b]) => (b as Bookmark[]).length - (a as Bookmark[]).length
+        )
+        .flatMap(([, domainBookmarks]) => domainBookmarks as Bookmark[]);
+    });
   }
 
   private matchWithRegex(
@@ -147,5 +181,9 @@ export class BookmarkService {
 
   private exists(href: string): boolean {
     return this.hrefSet.has(href);
+  }
+
+  static orderBookmarksByDomain(bookmarks: Bookmark[]): Bookmark[] {
+    return BookmarkService.prototype.sortBookmarksByDomainFrequency(bookmarks);
   }
 }

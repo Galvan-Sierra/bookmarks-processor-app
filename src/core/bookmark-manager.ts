@@ -125,6 +125,11 @@ export class BookmarkManager {
 
     console.log(`🗑️ ${deletedCount} bookmarks deleted`);
   }
+
+  orderBookmarksByDomain(): void {
+    this.bookmarkService.orderByDomain();
+  }
+
   private validateBookmarksLoaded(): void {
     if (!this.isLoaded) {
       throw new Error(
