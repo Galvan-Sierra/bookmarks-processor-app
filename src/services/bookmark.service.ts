@@ -21,7 +21,6 @@ export class BookmarkService {
 
   findBy(options: SearchOptions): Bookmark[] {
     let { includeWords } = options;
-
     const {
       excludeWords = [],
       caseSensitive = false,
@@ -30,18 +29,25 @@ export class BookmarkService {
       searchInFolder = false,
       useRegex = false,
       regexFlags = 'g',
+      includeAllWords = false, // ✅ Por defecto mantiene comportamiento actual (OR)
     } = options;
 
-    if (includeWords.length === 0) {
+    // Validaciones de entrada
+    if (
+      !includeWords ||
+      (Array.isArray(includeWords) && includeWords.length === 0)
+    ) {
       return [];
     }
 
+    // Normalizar includeWords a array
     if (typeof includeWords === 'string') {
       includeWords = [includeWords];
     }
 
     return this.bookmarks.filter((bookmark) => {
       const searchTexts: string[] = [];
+
       if (searchInTitle) searchTexts.push(bookmark.title);
       if (searchInHref) searchTexts.push(bookmark.href);
       if (searchInFolder && bookmark.folder) searchTexts.push(bookmark.folder);
@@ -54,19 +60,20 @@ export class BookmarkService {
           includeWords,
           excludeWords,
           caseSensitive,
-          regexFlags
+          regexFlags,
+          includeAllWords
         );
       } else {
         return this.matchWithKeywords(
           searchText,
           includeWords,
           excludeWords,
-          caseSensitive
+          caseSensitive,
+          includeAllWords
         );
       }
     });
   }
-
   extractBy(options: SearchOptions): Bookmark[] {
     const bookmarksToRemove = this.findBy(options);
 
@@ -130,7 +137,8 @@ export class BookmarkService {
     includeWords: string[],
     excludeWords: string[],
     caseSensitive: boolean,
-    regexFlags: string
+    regexFlags: string,
+    includeAllWords: boolean // ✅ Nuevo parámetro
   ): boolean {
     try {
       let flags = regexFlags;
@@ -138,10 +146,20 @@ export class BookmarkService {
         flags += 'i';
       }
 
-      const hasIncludeMatch = includeWords.some((pattern) => {
-        const regex = new RegExp(pattern, flags);
-        return regex.test(searchText);
-      });
+      // ✅ Lógica actualizada para includeAllWords
+      const includeMatchFn = includeAllWords
+        ? (patterns: string[]) =>
+            patterns.every((pattern) => {
+              const regex = new RegExp(pattern, flags);
+              return regex.test(searchText);
+            })
+        : (patterns: string[]) =>
+            patterns.some((pattern) => {
+              const regex = new RegExp(pattern, flags);
+              return regex.test(searchText);
+            });
+
+      const hasIncludeMatch = includeMatchFn(includeWords);
 
       const hasExcludeMatch = excludeWords.some((pattern) => {
         const regex = new RegExp(pattern, flags);
@@ -159,7 +177,8 @@ export class BookmarkService {
     searchText: string,
     includeWords: string[],
     excludeWords: string[],
-    caseSensitive: boolean
+    caseSensitive: boolean,
+    includeAllWords: boolean
   ): boolean {
     const prepareText = (text: string) =>
       caseSensitive ? text : text.toLowerCase();
@@ -168,9 +187,9 @@ export class BookmarkService {
     const includeWordsPrep = includeWords.map(prepareText);
     const excludeWordsPrep = excludeWords.map(prepareText);
 
-    const hasIncludeWord = includeWordsPrep.some((word) =>
-      searchTextPrep.includes(word)
-    );
+    const hasIncludeWord = includeAllWords
+      ? includeWordsPrep.every((word) => searchTextPrep.includes(word)) // AND lógico
+      : includeWordsPrep.some((word) => searchTextPrep.includes(word)); // OR lógico
 
     const hasExcludeWord = excludeWordsPrep.some((word) =>
       searchTextPrep.includes(word)

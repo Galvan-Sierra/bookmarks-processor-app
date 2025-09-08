@@ -15,6 +15,7 @@ export interface SearchOptions {
   searchInFolder?: boolean;
   useRegex?: boolean;
   regexFlags?: string;
+  includeAllWords?: boolean;
 }
 
 export interface FolderNode {
