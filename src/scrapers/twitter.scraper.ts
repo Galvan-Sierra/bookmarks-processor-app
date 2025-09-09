@@ -1,32 +1,29 @@
-import type { TwitterBookmark, ScanMode, AccountStats } from '@type/scraping';
+import { BaseScraper } from '@scrapers/base.scraper';
+import type {
+  TwitterBookmark,
+  ScanMode,
+  AccountStats,
+  BaseScraperConfig,
+} from '@type/scraping';
 import type { BaseSelectors, TwitterSavedSelectors } from '@type/selectors';
 import { createDownloadLink } from '@utils/scraping-utils';
 
 // CONSTANTS
-const BASE_URL = 'https://x.com';
-const MEDIA_PATH = '/media';
+
 const DEFAULT_INTERVAL = 1000; // 1 second
 const MAX_SAVED_BATCH = 2; // Maximum saved elements to process per scan
 
-const normalizeTwitterUrl = (url: string): string => {
-  if (!url) return '';
-
-  let normalizedUrl = url.startsWith(BASE_URL) ? url : `${BASE_URL}${url}`;
-
-  if (!normalizedUrl.endsWith(MEDIA_PATH)) normalizedUrl += MEDIA_PATH;
-
-  return normalizedUrl;
-};
-
-// MAIN CLASS
-class TwitterAccountTracker {
-  private accounts = new Map<string, TwitterBookmark>();
+class TwitterAccountTracker extends BaseScraper {
+  // private accounts = new Map<string, TwitterBookmark>();
   private intervalId: NodeJS.Timeout | null = null;
 
   constructor(
+    config: BaseScraperConfig,
     private followSelectors: BaseSelectors,
     private savedSelectors: TwitterSavedSelectors
-  ) {}
+  ) {
+    super(config);
+  }
 
   // PUBLIC METHODS
   start(mode: ScanMode, intervalSeconds: number = 1): void {
@@ -56,44 +53,12 @@ class TwitterAccountTracker {
     }
   }
 
-  addAccounts(accounts: TwitterBookmark[]): void {
-    let addedCount = 0;
-    accounts.forEach((account) => {
-      if (!this.accountExists(account.href)) {
-        this.addAccount(account);
-        addedCount++;
-      }
-    });
-
-    if (addedCount > 0) {
-      console.log(`📥 ${addedCount} cuentas añadidas manualmente`);
-    }
-  }
-
-  clearAccounts(): void {
-    const count = this.accounts.size;
-    this.accounts.clear();
-    console.log(`🗑️ ${count} cuentas eliminadas`);
-  }
-
-  getAccounts(): TwitterBookmark[] {
-    return Array.from(this.accounts.values());
-  }
-
   printStats(): void {
     const stats = this.getAccountStats();
     console.log(`📈 Estadísticas:
     - Seguidos: ${stats.follow}
     - Guardados: ${stats.saved}
     - Total: ${stats.total}`);
-  }
-
-  downloadJSON(): void {
-    const accounts = this.getAccounts();
-    const jsonData = JSON.stringify(accounts, null, 2);
-    const blob = new Blob([jsonData], { type: 'application/json' });
-    createDownloadLink(blob, 'twitter-accounts.json');
-    console.log(`📁 Descargando ${accounts.length} cuentas`);
   }
 
   // PRIVATE SCANNING METHODS
@@ -139,8 +104,8 @@ class TwitterAccountTracker {
       const title = this.extractCompleteText(element, selectors.title);
       const href = this.extractHref(element, selectors.href);
 
-      if (this.isValidAccountData(title, href) && !this.accountExists(href)) {
-        this.addAccount({ title, href, folder });
+      if (this.isValidAccountData(title, href) && !this.itemExists(href)) {
+        this.addItem({ title, href, folder });
         console.log(
           `${
             folder === 'follow' ? '👥' : '💾'
@@ -159,8 +124,8 @@ class TwitterAccountTracker {
       const title = this.extractCompleteText(element, selectors.title);
       const href = this.extractHref(element, selectors.href);
 
-      if (this.isValidAccountData(title, href) && !this.accountExists(href)) {
-        this.addAccount({ title, href, folder });
+      if (this.isValidAccountData(title, href) && !this.itemExists(href)) {
+        this.addItem({ title, href, folder });
         console.log(`💾 Nueva cuenta ${folder}: ${title} (${href})`);
       }
 
@@ -241,18 +206,8 @@ class TwitterAccountTracker {
     return Boolean(title?.trim() && href?.startsWith('/'));
   }
 
-  private accountExists(href: string): boolean {
-    const normalizedUrl = normalizeTwitterUrl(href);
-    return this.accounts.has(normalizedUrl);
-  }
-
-  private addAccount(account: TwitterBookmark): void {
-    const normalizedHref = normalizeTwitterUrl(account.href);
-    this.accounts.set(normalizedHref, { ...account, href: normalizedHref });
-  }
-
   private getAccountStats(): AccountStats {
-    const accounts = this.getAccounts();
+    const accounts = this.getItems();
     const followCount = accounts.filter(
       (acc) => acc.folder === 'follow'
     ).length;
@@ -261,13 +216,13 @@ class TwitterAccountTracker {
     return {
       follow: followCount,
       saved: savedCount,
-      total: this.accounts.size,
+      total: this.items.size,
     };
   }
 
   private logScanProgress(mode: ScanMode): void {
     console.log(
-      `📊 [${mode.toUpperCase()}] Cuentas escaneadas: ${this.accounts.size}`
+      `📊 [${mode.toUpperCase()}] Cuentas escaneadas: ${this.items.size}`
     );
   }
 }
@@ -289,8 +244,25 @@ const SAVED_SELECTORS: TwitterSavedSelectors = {
   savedButton: 'button[data-testid="removeBookmark"]',
 };
 
+const TWITTER_CONFIG: BaseScraperConfig = {
+  pageName: 'twitter accounts',
+  selectors: {
+    list: '#react-root > div > div > div.css-175oi2r.r-1f2l425.r-13qz1uu.r-417010.r-18u37iz > main > div > div > div > div > div > section > div > div',
+    item: 'div',
+    title:
+      'div > div > button > div > div.css-175oi2r.r-1iusvr4.r-16y2uox > div.css-175oi2r.r-1awozwy.r-18u37iz.r-1wtj0ep > div.css-175oi2r.r-1wbh5a2.r-dnmrzs.r-1ny4l3l > div > div.css-175oi2r.r-1wbh5a2.r-dnmrzs > a > div.css-175oi2r.r-1awozwy.r-18u37iz.r-dnmrzs > div.css-146c3p1.r-bcqeeo.r-1ttztb7.r-qvutc0.r-37j5jr.r-a023e6.r-rjixqe.r-b88u0q.r-1awozwy.r-6koalj.r-1udh08x.r-3s2u2q > span.css-1jxf684.r-dnmrzs.r-1udh08x.r-1udbk01.r-3s2u2q.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3',
+    href: 'div > div > button > div > div.css-175oi2r.r-1iusvr4.r-16y2uox > div.css-175oi2r.r-1awozwy.r-18u37iz.r-1wtj0ep > div.css-175oi2r.r-1wbh5a2.r-dnmrzs.r-1ny4l3l > div > div.css-175oi2r.r-1wbh5a2.r-dnmrzs > a',
+  },
+  normalizers: {
+    href: {
+      base: 'https://x.com',
+      end: '/media',
+    },
+  },
+};
 // INITIALIZATION
 const twitterTracker = new TwitterAccountTracker(
+  TWITTER_CONFIG,
   FOLLOW_SELECTORS,
   SAVED_SELECTORS
 );

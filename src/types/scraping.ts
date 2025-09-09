@@ -1,5 +1,14 @@
 import type { Bookmark } from '@type/bookmark';
-import type { MangaSelectors } from '@type/selectors';
+import type { BaseSelectors, MangaSelectors } from '@type/selectors';
+
+export interface BaseScraperConfig<T extends BaseSelectors = BaseSelectors> {
+  pageName: string;
+  selectors: T;
+  normalizers?: {
+    title?: NormalizeConfig;
+    href?: NormalizeConfig;
+  };
+}
 
 export interface NormalizeConfig {
   base: string;
