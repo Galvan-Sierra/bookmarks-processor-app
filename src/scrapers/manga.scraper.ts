@@ -1,37 +1,9 @@
 // ====================================
-// TIPOS E INTERFACES
-// ====================================
-
-interface Bookmark {
-  title: string;
-  href: string;
-  folder: string;
-}
-
-interface BaseSelectors {
-  list: string;
-  item: string;
-  title: string;
-  href: string;
-  nextPage: (currentPage: number) => string;
-}
-
-interface NormalizeConfig {
-  base: string;
-  end: string;
-}
-
-interface MangaTrackerConfig {
-  pageName: string;
-  titleNormalize: NormalizeConfig;
-  urlNormalize: NormalizeConfig;
-  selectors: BaseSelectors;
-  initialPage?: number;
-}
-
-// ====================================
 // CONSTANTES
 // ====================================
+
+import type { Bookmark } from '@type/bookmark';
+import type { MangaTrackerConfig } from '@type/scraping';
 
 const DEFAULT_INTERVAL = 1000; // 1 segundo
 const DEFAULT_PAGE = 1;
@@ -327,29 +299,6 @@ class MangaTracker {
 // ====================================
 
 // ====================================
-// INTERFACES
-// ====================================
-interface BaseSelectors {
-  list: string;
-  item: string;
-  title: string;
-  href: string;
-  nextPage: (currentPage: number) => string;
-}
-
-interface NormalizeConfig {
-  base: string;
-  end: string;
-}
-
-interface MangaTrackerConfig {
-  pageName: string;
-  titleNormalize: NormalizeConfig;
-  urlNormalize: NormalizeConfig;
-  selectors: BaseSelectors;
-  initialPage?: number;
-}
-// ====================================
 // EJEMPLO DE USO
 // ====================================*
 
@@ -362,7 +311,7 @@ const ikigai: MangaTrackerConfig = {
     item: 'li',
     title: 'a > h3',
     href: 'a',
-    nextPage: (page) =>
+    nextPage: (page: number) =>
       `https://viralikigai.damilok.xyz/series/?pagina=${page}`,
   },
   initialPage: 1,

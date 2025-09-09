@@ -1,28 +1,5 @@
-// INTERFACES
-interface Bookmark {
-  title: string;
-  href: string;
-  folder: 'follow' | 'saved';
-}
-
-interface BaseSelectors {
-  list: string;
-  item: string;
-  title: string;
-  href: string;
-}
-
-interface SavedSelectors extends BaseSelectors {
-  savedButton: string;
-}
-
-interface AccountStats {
-  follow: number;
-  saved: number;
-  total: number;
-}
-
-type ScanMode = 'follow' | 'saved';
+import type { TwitterBookmark, ScanMode, AccountStats } from '@type/scraping';
+import type { BaseSelectors, TwitterSavedSelectors } from '@type/selectors';
 
 // CONSTANTS
 const BASE_URL = 'https://x.com';
@@ -52,12 +29,12 @@ const normalizeTwitterUrl = (url: string): string => {
 
 // MAIN CLASS
 class TwitterAccountTracker {
-  private accounts = new Map<string, Bookmark>();
+  private accounts = new Map<string, TwitterBookmark>();
   private intervalId: NodeJS.Timeout | null = null;
 
   constructor(
     private followSelectors: BaseSelectors,
-    private savedSelectors: SavedSelectors
+    private savedSelectors: TwitterSavedSelectors
   ) {}
 
   // PUBLIC METHODS
@@ -88,7 +65,7 @@ class TwitterAccountTracker {
     }
   }
 
-  addAccounts(accounts: Bookmark[]): void {
+  addAccounts(accounts: TwitterBookmark[]): void {
     let addedCount = 0;
     accounts.forEach((account) => {
       if (!this.accountExists(account.href)) {
@@ -108,7 +85,7 @@ class TwitterAccountTracker {
     console.log(`🗑️ ${count} cuentas eliminadas`);
   }
 
-  getAccounts(): Bookmark[] {
+  getAccounts(): TwitterBookmark[] {
     return Array.from(this.accounts.values());
   }
 
@@ -165,7 +142,7 @@ class TwitterAccountTracker {
   private processAccountElements(
     elements: NodeListOf<Element>,
     selectors: BaseSelectors,
-    folder: Bookmark['folder']
+    folder: TwitterBookmark['folder']
   ): void {
     elements.forEach((element) => {
       const title = this.extractCompleteText(element, selectors.title);
@@ -184,8 +161,8 @@ class TwitterAccountTracker {
 
   private processSavedElements(
     elements: Element[],
-    selectors: SavedSelectors,
-    folder: Bookmark['folder']
+    selectors: TwitterSavedSelectors,
+    folder: TwitterBookmark['folder']
   ): void {
     elements.forEach((element) => {
       const title = this.extractCompleteText(element, selectors.title);
@@ -278,7 +255,7 @@ class TwitterAccountTracker {
     return this.accounts.has(normalizedUrl);
   }
 
-  private addAccount(account: Bookmark): void {
+  private addAccount(account: TwitterBookmark): void {
     const normalizedHref = normalizeTwitterUrl(account.href);
     this.accounts.set(normalizedHref, { ...account, href: normalizedHref });
   }
@@ -313,7 +290,7 @@ const FOLLOW_SELECTORS: BaseSelectors = {
   href: 'div > div > button > div > div.css-175oi2r.r-1iusvr4.r-16y2uox > div.css-175oi2r.r-1awozwy.r-18u37iz.r-1wtj0ep > div.css-175oi2r.r-1wbh5a2.r-dnmrzs.r-1ny4l3l > div > div.css-175oi2r.r-1wbh5a2.r-dnmrzs > a',
 };
 
-const SAVED_SELECTORS: SavedSelectors = {
+const SAVED_SELECTORS: TwitterSavedSelectors = {
   list: 'div[aria-label="Cronología: Guardados"]',
   item: 'article[data-testid="tweet"]',
   title: 'span.css-1jxf684.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3',
