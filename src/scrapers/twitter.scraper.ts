@@ -1,21 +1,12 @@
 import type { TwitterBookmark, ScanMode, AccountStats } from '@type/scraping';
 import type { BaseSelectors, TwitterSavedSelectors } from '@type/selectors';
+import { createDownloadLink } from '@utils/scraping-utils';
 
 // CONSTANTS
 const BASE_URL = 'https://x.com';
 const MEDIA_PATH = '/media';
 const DEFAULT_INTERVAL = 1000; // 1 second
 const MAX_SAVED_BATCH = 2; // Maximum saved elements to process per scan
-
-// UTILITY FUNCTIONS
-const createDownloadLink = (blob: Blob, filename: string): void => {
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  link.click();
-  URL.revokeObjectURL(url);
-};
 
 const normalizeTwitterUrl = (url: string): string => {
   if (!url) return '';

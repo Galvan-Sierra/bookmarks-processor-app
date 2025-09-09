@@ -4,6 +4,7 @@
 
 import type { Bookmark } from '@type/bookmark';
 import type { MangaTrackerConfig } from '@type/scraping';
+import { createDownloadLink } from '@utils/scraping-utils';
 
 const DEFAULT_INTERVAL = 1000; // 1 segundo
 const DEFAULT_PAGE = 1;
@@ -103,7 +104,7 @@ class MangaTracker {
     const jsonData = JSON.stringify(mangaList, null, 2);
     const blob = new Blob([jsonData], { type: 'application/json' });
 
-    this.createDownloadLink(blob, `${this.config.pageName}.json`);
+    createDownloadLink(blob, `${this.config.pageName}.json`);
     console.log(`📁 Descargando ${mangaList.length} mangas`);
   }
 
@@ -280,17 +281,6 @@ class MangaTracker {
     }
 
     return normalized;
-  }
-
-  private createDownloadLink(blob: Blob, filename: string): void {
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-
-    link.href = url;
-    link.download = filename;
-    link.click();
-
-    URL.revokeObjectURL(url);
   }
 }
 
