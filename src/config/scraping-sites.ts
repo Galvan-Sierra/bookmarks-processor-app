@@ -1,4 +1,4 @@
-import type { TwitterTrackerConfig } from '@type/scraping';
+import type { MangaTrackerConfig, TwitterTrackerConfig } from '@type/scraping';
 
 export const TWITTER_CONFIG: TwitterTrackerConfig = {
   pageName: 'twitter accounts',
@@ -22,4 +22,21 @@ export const TWITTER_CONFIG: TwitterTrackerConfig = {
       end: '/media',
     },
   },
+};
+
+export const ikigai: MangaTrackerConfig = {
+  pageName: 'ikigai manga',
+  normalizers: {
+    title: { base: '', end: ' | Ikigai Mangas' },
+    href: { base: 'https://viralikigai.damilok.xyz', end: '/' },
+  },
+  selectors: {
+    list: 'body > main > section > ul',
+    item: 'li',
+    title: 'a > h3',
+    href: 'a',
+    nextPage: (page: number) =>
+      `https://viralikigai.damilok.xyz/series/?pagina=${page}`,
+  },
+  initialPage: 1,
 };

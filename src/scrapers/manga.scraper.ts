@@ -1,7 +1,4 @@
-// ====================================
-// CONSTANTES
-// ====================================
-
+import { ikigai } from '@config/scraping-sites';
 import { BaseScraper } from '@scrapers/base.scraper';
 import type { Bookmark } from '@type/bookmark';
 import type { MangaTrackerConfig } from '@type/scraping';
@@ -11,6 +8,18 @@ import { createDownloadLink } from '@utils/scraping-utils';
 const DEFAULT_PAGE = 1;
 
 class MangaTracker extends BaseScraper<MangaTrackerConfig> {
+  protected configure(...args: any): this {
+    throw new Error('Method not implemented.');
+  }
+  protected processItems(...args: any): void {
+    throw new Error('Method not implemented.');
+  }
+  protected setupInterval(): void {
+    throw new Error('Method not implemented.');
+  }
+  protected getTrackerName(): string {
+    throw new Error('Method not implemented.');
+  }
   private currentPage: number;
   private isNavigating = false;
 
@@ -52,15 +61,6 @@ class MangaTracker extends BaseScraper<MangaTrackerConfig> {
     this.scanMangas();
   }
 
-  stop(): void {
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-      this.intervalId = null;
-      this.isNavigating = false;
-      console.log('⏹️ MangaTracker detenido');
-    }
-  }
-
   printStats(): void {
     console.log(`📈 Estadísticas: Total: ${this.items.size} mangas`);
   }
@@ -87,10 +87,7 @@ class MangaTracker extends BaseScraper<MangaTrackerConfig> {
     elements.forEach((element) => {
       const mangaData = this.extractMangaData(element);
 
-      if (
-        this.isValidMangaData(mangaData) &&
-        !this.itemExists(mangaData.href)
-      ) {
+      if (!this.itemExists(mangaData.href)) {
         this.addItem(mangaData);
         console.log(`📚 Nuevo manga: ${mangaData.title}`);
       }
@@ -153,53 +150,7 @@ class MangaTracker extends BaseScraper<MangaTrackerConfig> {
   // ====================================
   // MÉTODOS PRIVADOS - UTILIDADES
   // ====================================
-
-  private isRunning(): boolean {
-    return this.intervalId !== null;
-  }
-
-  private isValidMangaData(manga: Bookmark): boolean {
-    return Boolean(manga.title.trim() && manga.href.trim());
-  }
-
-  // private extractText(element: Element, selector: string): string {
-  //   const textElement = element.querySelector(selector);
-  //   return textElement?.textContent?.trim() || 'Sin nombre';
-  // }
-
-  // private extractHref(element: Element, selector: string): string {
-  //   const linkElement = element.querySelector(selector);
-  //   return linkElement?.getAttribute('href')?.trim() || '';
-  // }
-
-  // private querySelector(
-  //   selector: string,
-  //   parent: Element | Document = document
-  // ): Element | null {
-  //   try {
-  //     return parent.querySelector(selector);
-  //   } catch (error) {
-  //     console.error(`❌ Selector inválido: ${selector}`, error);
-  //     return null;
-  //   }
-  // }
-
-  ikigai: MangaTrackerConfig = {
-    pageName: 'ikigai manga',
-    normalizers: {
-      title: { base: '', end: ' | Ikigai Mangas' },
-      href: { base: 'https://viralikigai.damilok.xyz', end: '/' },
-    },
-    selectors: {
-      list: 'body > main > section > ul',
-      item: 'li',
-      title: 'a > h3',
-      href: 'a',
-      nextPage: (page: number) =>
-        `https://viralikigai.damilok.xyz/series/?pagina=${page}`,
-    },
-    initialPage: 1,
-  };
 }
-// const mangaTracker = new MangaTracker(ikigai);
-// mangaTracker.start(true); // Intervalo de 2 segundos, navegación automática activada
+
+const mangaTracker = new MangaTracker(ikigai);
+mangaTracker.start(true); // Intervalo de 2 segundos, navegación automática activada
