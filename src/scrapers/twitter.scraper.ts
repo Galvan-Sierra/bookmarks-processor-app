@@ -1,30 +1,30 @@
-import {
-  TWITTER_CONFIG,
-  FOLLOW_SELECTORS,
-  SAVED_SELECTORS,
-} from '@config/scraping-sites';
+import { TWITTER_CONFIG } from '@config/scraping-sites';
 import { BaseScraper } from '@scrapers/base.scraper';
-import type {
-  BaseScraperConfig,
-  ScanMode,
-  TwitterBookmark,
-  AccountStats,
-  twitterTrackerConfig,
-} from '@type/scraping';
-import type { BaseSelectors, TwitterSavedSelectors } from '@type/selectors';
 import { DOMHelper } from '@utils/dom';
+
+import type { Bookmark } from '@type/bookmark';
+import type { TwitterTrackerConfig } from '@type/scraping';
+import type { BaseSelectors, TwitterSavedSelectors } from '@type/selectors';
+
+export interface TwitterBookmark extends Bookmark {
+  folder: 'follow' | 'saved';
+}
+
+export interface AccountStats {
+  follow: number;
+  saved: number;
+  total: number;
+}
+
+export type ScanMode = 'follow' | 'saved';
 
 const MAX_SAVED_BATCH = 2;
 
-class TwitterAccountTracker extends BaseScraper {
+class TwitterAccountTracker extends BaseScraper<TwitterTrackerConfig> {
   private mode: ScanMode = 'follow';
   private intervalSeconds: number = 1;
 
-  constructor(
-    config: BaseScraperConfig,
-    private followSelectors: BaseSelectors,
-    private savedSelectors: TwitterSavedSelectors
-  ) {
+  constructor(config: TwitterTrackerConfig) {
     super(config);
   }
 
@@ -36,7 +36,9 @@ class TwitterAccountTracker extends BaseScraper {
 
   setupInterval(): void {
     const selectors =
-      this.mode === 'follow' ? this.followSelectors : this.savedSelectors;
+      this.mode === 'follow'
+        ? this.config.selectors
+        : this.config.savedSelectors;
 
     const scanFunction =
       this.mode === 'follow'
@@ -115,10 +117,5 @@ class TwitterAccountTracker extends BaseScraper {
   }
 }
 
-const twitterTracker = new TwitterAccountTracker(
-  TWITTER_CONFIG,
-  FOLLOW_SELECTORS,
-  SAVED_SELECTORS
-);
-
+const twitterTracker = new TwitterAccountTracker(TWITTER_CONFIG);
 twitterTracker.configure('saved').start();

@@ -5,10 +5,12 @@ export interface BaseSelectors {
   href: string;
 }
 
-export interface MangaSelectors extends BaseSelectors {
-  nextPage: (currentPage: number) => string;
-}
-
+// --- Twitter Saved Selectors ---
 export interface TwitterSavedSelectors extends BaseSelectors {
   savedButton: string;
+}
+
+// --- Manga Selectors ---
+export interface MangaSelectors extends BaseSelectors {
+  nextPage: (currentPage: number) => string;
 }

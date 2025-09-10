@@ -1,4 +1,3 @@
-import type { Bookmark } from '@type/bookmark';
 import type {
   BaseSelectors,
   MangaSelectors,
@@ -19,23 +18,13 @@ export interface NormalizeConfig {
   end: string;
 }
 
-export interface twitterTrackerConfig
-  extends BaseScraperConfig<TwitterSavedSelectors> {
+export interface TwitterTrackerConfig extends BaseScraperConfig {
   savedSelectors: TwitterSavedSelectors;
 }
+
+// --- Manga Tracker Config ---
+
 export interface MangaTrackerConfig extends BaseScraperConfig {
   selectors: MangaSelectors;
   initialPage?: number;
 }
-
-export interface TwitterBookmark extends Bookmark {
-  folder: 'follow' | 'saved';
-}
-
-export interface AccountStats {
-  follow: number;
-  saved: number;
-  total: number;
-}
-
-export type ScanMode = 'follow' | 'saved';
