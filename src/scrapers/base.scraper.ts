@@ -96,35 +96,37 @@ export abstract class BaseScraper<
   }
 
   protected normalizeHref(href: string): string {
-    const normalizer = this.config.normalizers?.href;
+    const { normalizers } = this.config;
+    const { href: hrefNormalizer } = normalizers ?? {};
 
-    if (!normalizer || !href) return href;
+    if (!hrefNormalizer || !href) return href;
 
-    const { base: baseUrl, end: urlEnd } = normalizer;
-
+    const { base: baseUrl, end: urlEnd } = hrefNormalizer;
     let normalizedUrl = href;
 
     if (!normalizedUrl.startsWith(baseUrl))
       normalizedUrl = `${baseUrl}${normalizedUrl}`;
-
     if (!normalizedUrl.endsWith(urlEnd)) normalizedUrl += urlEnd;
 
     return normalizedUrl;
   }
 
   protected normalizeTitle(title: string): string {
-    const normalizer = this.config.normalizers?.title;
+    const { title: titleNormalizer } = this.config.normalizers ?? {};
 
-    if (!normalizer || !title) return title;
+    if (!titleNormalizer || !title) return title;
 
-    const { base: baseTitle, end: titleEnd } = normalizer;
+    const { base: titleBase, end: titleEnd } = titleNormalizer;
 
     let normalizedTitle = title;
 
-    if (!normalizedTitle.startsWith(baseTitle))
-      normalizedTitle = `${baseTitle}${normalizedTitle}`;
+    if (!normalizedTitle.startsWith(titleBase)) {
+      normalizedTitle = `${titleBase}${normalizedTitle}`;
+    }
 
-    if (!normalizedTitle.endsWith(titleEnd)) normalizedTitle += titleEnd;
+    if (!normalizedTitle.endsWith(titleEnd)) {
+      normalizedTitle += titleEnd;
+    }
 
     return normalizedTitle;
   }
