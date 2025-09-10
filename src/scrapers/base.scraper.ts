@@ -12,6 +12,21 @@ export abstract class BaseScraper<
 
   constructor(protected config: TConfig) {}
 
+  start(): void {
+    if (this.isRunning()) {
+      console.warn(`🔄 ${this.getTrackerName()} ya está ejecutándose`);
+      return;
+    }
+
+    console.log(`🚀 ${this.getTrackerName()} iniciado`);
+
+    // Hook methods implementados por subclases
+
+    // No se como hacerlo
+    // this.configure();
+    this.setupInterval();
+  }
+
   protected addItems(...items: TBookmark[]): void {
     let addedCount = 0;
 
@@ -85,7 +100,7 @@ export abstract class BaseScraper<
     return this.items.has(normalizedHref);
   }
 
-  downloadJSON(): void {
+  protected downloadJSON(): void {
     const accounts = this.getItems();
     const jsonData = JSON.stringify(accounts, null, 2);
     const blob = new Blob([jsonData], { type: 'application/json' });
@@ -99,5 +114,14 @@ export abstract class BaseScraper<
       this.intervalId = null;
       console.log('⏹️ MangaTracker detenido');
     }
+  }
+
+  // Métodos abstractos que implementan las subclases
+  protected abstract configure(...args: any): this;
+  protected abstract setupInterval(): void;
+  protected abstract getTrackerName(): string;
+
+  protected isRunning(): boolean {
+    return this.intervalId !== null;
   }
 }

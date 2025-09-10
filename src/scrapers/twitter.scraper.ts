@@ -16,6 +16,9 @@ import { DOMHelper } from '@utils/dom';
 const MAX_SAVED_BATCH = 2;
 
 class TwitterAccountTracker extends BaseScraper {
+  private mode: ScanMode = 'follow';
+  private intervalSeconds: number = 1;
+
   constructor(
     config: BaseScraperConfig,
     private followSelectors: BaseSelectors,
@@ -24,23 +27,26 @@ class TwitterAccountTracker extends BaseScraper {
     super(config);
   }
 
-  start(mode: ScanMode, intervalSeconds: number = 1): void {
-    if (this.intervalId) {
-      console.warn(`🔄 TwitterAccountTracker ya está ejecutándose (${mode})`);
-      return;
-    }
+  configure(mode: ScanMode, intervalSeconds = 1): this {
+    this.mode = mode;
+    this.intervalSeconds = intervalSeconds;
+    return this;
+  }
 
+  setupInterval(): void {
     const scanFunction =
-      mode === 'follow'
+      this.mode === 'follow'
         ? () => this.scanFollowAccounts()
         : () => this.scanSavedAccounts();
 
     this.intervalId = setInterval(() => {
       scanFunction();
-      this.logScanProgress(mode);
-    }, this.DEFAULT_INTERVAL * intervalSeconds);
+      this.logScanProgress(this.mode);
+    }, this.DEFAULT_INTERVAL * this.intervalSeconds);
+  }
 
-    console.log(`🚀 TwitterAccountTracker iniciado (modo: ${mode})`);
+  protected getTrackerName(): string {
+    return 'TwitterAccountTracker';
   }
 
   printStats(): void {
@@ -150,3 +156,5 @@ const twitterTracker = new TwitterAccountTracker(
   FOLLOW_SELECTORS,
   SAVED_SELECTORS
 );
+
+twitterTracker.configure('follow').start();
