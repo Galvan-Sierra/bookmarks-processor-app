@@ -5,24 +5,22 @@ import type { MangaTrackerConfig } from '@type/scraping';
 import { DOMHelper } from '@utils/dom';
 import { createDownloadLink } from '@utils/scraping-utils';
 
-const DEFAULT_PAGE = 1;
-
 class MangaTracker extends BaseScraper<MangaTrackerConfig> {
-  protected processItems(...args: any): void {
-    throw new Error('Method not implemented.');
-  }
-
-  private currentPage: number;
+  private currentPage = 1;
+  private timeInterval = 1;
   private isNavigating = false;
-  private shouldNavigateToNextPage: boolean = false;
-  protected timeInterval: number = 2;
+  private shouldNavigateToNextPage = false;
 
   constructor(config: MangaTrackerConfig) {
     super(config);
-    this.currentPage = config.initialPage ?? DEFAULT_PAGE;
   }
 
-  configure(shouldNavigateToNextPage = false, timeInterval = 2): this {
+  configure(
+    currentPage = 1,
+    shouldNavigateToNextPage = false,
+    timeInterval = 3
+  ): this {
+    this.currentPage = currentPage;
     this.shouldNavigateToNextPage = shouldNavigateToNextPage;
     this.timeInterval = timeInterval;
     return this;
@@ -35,7 +33,7 @@ class MangaTracker extends BaseScraper<MangaTrackerConfig> {
         return;
       }
 
-      this.scanMangas();
+      this.scanItems(this.config.selectors);
 
       if (this.shouldNavigateToNextPage) {
         this.navigateToNextPage();
@@ -45,40 +43,13 @@ class MangaTracker extends BaseScraper<MangaTrackerConfig> {
     }, this.DEFAULT_INTERVAL * this.timeInterval);
   }
 
-  scanNow(): void {
-    console.log('🔍 Iniciando escaneo manual...');
-    this.scanMangas();
-  }
-
-  printStats(): void {
-    console.log(`📈 Estadísticas: Total: ${this.items.size} mangas`);
-  }
-
   getTrackerName(): string {
     return 'MangaTracker';
   }
 
-  // ====================================
-  // MÉTODOS PRIVADOS - ESCANEO
-  // ====================================
-
-  private scanMangas(): void {
-    const listElement = DOMHelper.querySelector(this.config.selectors.list);
-
-    if (!listElement) {
-      console.warn('⚠️ Lista de mangas no encontrada');
-      return;
-    }
-
-    const mangaElements = listElement.querySelectorAll(
-      this.config.selectors.item
-    );
-    this.processMangaElements(mangaElements);
-  }
-
-  private processMangaElements(elements: NodeListOf<Element>): void {
+  processItems(elements: Element[]): void {
     elements.forEach((element) => {
-      const mangaData = this.extractMangaData(element);
+      const mangaData = this.extractData(element);
 
       if (!this.itemExists(mangaData.href)) {
         this.addItem(mangaData);
@@ -87,7 +58,13 @@ class MangaTracker extends BaseScraper<MangaTrackerConfig> {
     });
   }
 
-  private extractMangaData(element: Element): Bookmark {
+  // Métodos propios del MangaTracker
+
+  printStats(): void {
+    console.log(`📈 Estadísticas: Total: ${this.items.size} mangas`);
+  }
+
+  private extractData(element: Element): Bookmark {
     const { selectors } = this.config;
 
     return {
@@ -96,10 +73,6 @@ class MangaTracker extends BaseScraper<MangaTrackerConfig> {
       folder: this.config.pageName,
     };
   }
-
-  // ====================================
-  // MÉTODOS PRIVADOS - NAVEGACIÓN
-  // ====================================
 
   private navigateToNextPage(): void {
     const nextPageUrl = this.config.selectors.nextPage(this.currentPage);
@@ -139,11 +112,7 @@ class MangaTracker extends BaseScraper<MangaTrackerConfig> {
       currentList.innerHTML = newList.innerHTML;
     }
   }
-
-  // ====================================
-  // MÉTODOS PRIVADOS - UTILIDADES
-  // ====================================
 }
 
 const mangaTracker = new MangaTracker(ikigai);
-mangaTracker.configure(true).start(); // Intervalo de 2 segundos, navegación automática activada
+mangaTracker.configure(1, true).start();

@@ -28,7 +28,7 @@ export const ikigai: MangaTrackerConfig = {
   pageName: 'ikigai manga',
   normalizers: {
     title: { base: '', end: ' | Ikigai Mangas' },
-    href: { base: 'https://viralikigai.damilok.xyz', end: '/' },
+    href: { base: 'https://visualikigai.kloudytech.com/', end: '/' },
   },
   selectors: {
     list: 'body > main > section > ul',
@@ -36,7 +36,7 @@ export const ikigai: MangaTrackerConfig = {
     title: 'a > h3',
     href: 'a',
     nextPage: (page: number) =>
-      `https://viralikigai.damilok.xyz/series/?pagina=${page}`,
+      `https://visualikigai.kloudytech.com//series/?pagina=${page}`,
   },
   initialPage: 1,
 };
