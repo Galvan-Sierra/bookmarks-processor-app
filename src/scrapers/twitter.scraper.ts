@@ -70,28 +70,26 @@ class TwitterAccountTracker extends BaseScraper<TwitterTrackerConfig> {
     const folder = this.mode === 'follow' ? 'follow' : 'saved';
 
     if (this.mode === 'saved') {
-      {
-        elements = elements.slice(0, MAX_SAVED_BATCH);
+      elements = elements.slice(0, MAX_SAVED_BATCH);
+    }
+
+    for (const element of elements) {
+      const title = DOMHelper.extractCompleteText(element, selectors.title);
+      const href = DOMHelper.extractHref(element, selectors.href);
+
+      if (!this.itemExists(href)) {
+        this.addItem({ title, href, folder });
+
+        console.log(`💾 Nueva cuenta ${folder}: ${title} (${href})`);
       }
 
-      for (const element of elements) {
-        const title = DOMHelper.extractCompleteText(element, selectors.title);
-        const href = DOMHelper.extractHref(element, selectors.href);
+      if (this.mode === 'saved' && 'savedButton' in selectors) {
+        const saveButton = DOMHelper.querySelector(
+          selectors.savedButton,
+          element
+        ) as HTMLButtonElement;
 
-        if (!this.itemExists(href)) {
-          this.addItem({ title, href, folder });
-
-          console.log(`💾 Nueva cuenta ${folder}: ${title} (${href})`);
-        }
-
-        if (this.mode === 'saved' && 'savedButton' in selectors) {
-          const saveButton = DOMHelper.querySelector(
-            selectors.savedButton,
-            element
-          ) as HTMLButtonElement;
-
-          DOMHelper.clickElement(saveButton);
-        }
+        DOMHelper.clickElement(saveButton);
       }
     }
   }
@@ -118,4 +116,4 @@ class TwitterAccountTracker extends BaseScraper<TwitterTrackerConfig> {
 }
 
 const twitterTracker = new TwitterAccountTracker(TWITTER_CONFIG);
-twitterTracker.configure('saved').start();
+twitterTracker.configure('follow').start();
