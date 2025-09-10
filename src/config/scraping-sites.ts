@@ -40,3 +40,15 @@ export const ikigai: MangaTrackerConfig = {
     `https://visualikigai.kloudytech.com//series/?pagina=${page}`,
   initialPage: 1,
 };
+
+export const mhScan: MangaTrackerConfig = {
+  pageName: 'mhScan manga',
+  normalizers: {},
+  selectors: {
+    list: 'body > div.wrap > div > div.site-content > div.c-page-content > div > div > div > div > div > div > div.c-page__content > div > div',
+
+    item: 'div',
+    title: 'div.col-8.col-md-10 > div.tab-summary > div.post-title > h3',
+    href: 'div.col-8.col-md-10 > div.tab-summary > div.post-title > h3 > a',
+  },
+};
