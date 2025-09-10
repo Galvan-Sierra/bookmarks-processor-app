@@ -6,8 +6,12 @@ import type { Bookmark } from '@type/bookmark';
 import type { TwitterTrackerConfig } from '@type/scraping';
 import type { BaseSelectors, TwitterSavedSelectors } from '@type/selectors';
 
+enum Folder {
+  FOLLOW = '🐤 twitter > follow',
+  SAVED = '🐤 twitter > saved',
+}
 export interface TwitterBookmark extends Bookmark {
-  folder: 'follow' | 'saved';
+  folder: Folder;
 }
 
 export interface AccountStats {
@@ -16,42 +20,71 @@ export interface AccountStats {
   total: number;
 }
 
-export type ScanMode = 'follow' | 'saved';
-
-const MAX_SAVED_BATCH = 2;
+export type ScanMode = keyof typeof Folder;
 
 class TwitterAccountTracker extends BaseScraper<TwitterTrackerConfig> {
-  private mode: ScanMode = 'follow';
+  private mode: ScanMode = 'FOLLOW';
   private intervalSeconds: number = 1;
+  private maxSavedBatch = 2;
 
   constructor(config: TwitterTrackerConfig) {
     super(config);
   }
 
-  configure(mode: ScanMode, intervalSeconds = 1): this {
+  configure(mode: ScanMode, maxSavedBatch = 2, intervalSeconds = 1): this {
     this.mode = mode;
     this.intervalSeconds = intervalSeconds;
+    this.maxSavedBatch = maxSavedBatch;
     return this;
   }
 
   setupInterval(): void {
     const selectors =
-      this.mode === 'follow'
+      this.mode === 'FOLLOW'
         ? this.config.selectors
         : this.config.savedSelectors;
 
-    const scanFunction =
-      this.mode === 'follow'
-        ? () => this.scanItems(selectors)
-        : () => this.scanItems(selectors);
-
     this.intervalId = setInterval(() => {
-      scanFunction();
+      this.scanItems(selectors);
+
       this.logScanProgress(this.mode);
     }, this.DEFAULT_INTERVAL * this.intervalSeconds);
   }
 
-  protected getTrackerName(): string {
+  processItems(
+    elements: Element[],
+    selectors: BaseSelectors | TwitterSavedSelectors
+  ): void {
+    const folder = this.mode === 'FOLLOW' ? Folder.FOLLOW : Folder.SAVED;
+    const isSavedMode = this.mode === 'SAVED';
+
+    if (isSavedMode) {
+      elements = elements.slice(0, this.maxSavedBatch);
+    }
+
+    for (const element of elements) {
+      const title = DOMHelper.extractCompleteText(element, selectors.title);
+      const href = DOMHelper.extractHref(element, selectors.href);
+
+      const normalizedHref = this.normalizeHref(href);
+
+      if (!this.itemExists(normalizedHref)) {
+        this.addItem({ title, href, folder });
+        console.log(`💾 Nueva cuenta ${this.mode}: ${title} (${href})`);
+      }
+
+      if (isSavedMode && 'savedButton' in selectors) {
+        const saveButton = DOMHelper.querySelector(
+          selectors.savedButton,
+          element
+        ) as HTMLButtonElement;
+
+        DOMHelper.clickElement(saveButton);
+      }
+    }
+  }
+
+  getTrackerName(): string {
     return 'TwitterAccountTracker';
   }
 
@@ -63,43 +96,16 @@ class TwitterAccountTracker extends BaseScraper<TwitterTrackerConfig> {
     - Total: ${stats.total}`);
   }
 
-  processItems(
-    elements: Element[],
-    selectors: BaseSelectors | TwitterSavedSelectors
-  ): void {
-    const folder = this.mode === 'follow' ? 'follow' : 'saved';
-
-    if (this.mode === 'saved') {
-      elements = elements.slice(0, MAX_SAVED_BATCH);
-    }
-
-    for (const element of elements) {
-      const title = DOMHelper.extractCompleteText(element, selectors.title);
-      const href = DOMHelper.extractHref(element, selectors.href);
-
-      if (!this.itemExists(href)) {
-        this.addItem({ title, href, folder });
-
-        console.log(`💾 Nueva cuenta ${folder}: ${title} (${href})`);
-      }
-
-      if (this.mode === 'saved' && 'savedButton' in selectors) {
-        const saveButton = DOMHelper.querySelector(
-          selectors.savedButton,
-          element
-        ) as HTMLButtonElement;
-
-        DOMHelper.clickElement(saveButton);
-      }
-    }
-  }
-
   private getAccountStats(): AccountStats {
     const accounts = this.getItems();
+
     const followCount = accounts.filter(
-      (acc) => acc.folder === 'follow'
+      (acc) => acc.folder === Folder.FOLLOW
     ).length;
-    const savedCount = accounts.filter((acc) => acc.folder === 'saved').length;
+
+    const savedCount = accounts.filter(
+      (acc) => acc.folder === Folder.SAVED
+    ).length;
 
     return {
       follow: followCount,
@@ -116,4 +122,4 @@ class TwitterAccountTracker extends BaseScraper<TwitterTrackerConfig> {
 }
 
 const twitterTracker = new TwitterAccountTracker(TWITTER_CONFIG);
-twitterTracker.configure('follow').start();
+twitterTracker.configure('FOLLOW').start();
