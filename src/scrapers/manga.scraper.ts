@@ -8,38 +8,27 @@ import { createDownloadLink } from '@utils/scraping-utils';
 const DEFAULT_PAGE = 1;
 
 class MangaTracker extends BaseScraper<MangaTrackerConfig> {
-  protected configure(...args: any): this {
-    throw new Error('Method not implemented.');
-  }
   protected processItems(...args: any): void {
     throw new Error('Method not implemented.');
   }
-  protected setupInterval(): void {
-    throw new Error('Method not implemented.');
-  }
-  protected getTrackerName(): string {
-    throw new Error('Method not implemented.');
-  }
+
   private currentPage: number;
   private isNavigating = false;
+  private shouldNavigateToNextPage: boolean = false;
+  protected timeInterval: number = 2;
 
   constructor(config: MangaTrackerConfig) {
     super(config);
     this.currentPage = config.initialPage ?? DEFAULT_PAGE;
   }
 
-  start(shouldNavigateToNextPage = false, timeInterval = 2): void {
-    if (this.isRunning()) {
-      console.warn('🔄 MangaTracker ya está ejecutándose');
-      return;
-    }
+  configure(shouldNavigateToNextPage = false, timeInterval = 2): this {
+    this.shouldNavigateToNextPage = shouldNavigateToNextPage;
+    this.timeInterval = timeInterval;
+    return this;
+  }
 
-    console.log('🚀 MangaTracker iniciado');
-
-    // Escaneo inicial
-    // this.scanMangas();
-
-    // Configurar interval
+  setupInterval(): void {
     this.intervalId = setInterval(() => {
       if (this.isNavigating) {
         console.log('⏳ Navegando, esperando...');
@@ -48,12 +37,12 @@ class MangaTracker extends BaseScraper<MangaTrackerConfig> {
 
       this.scanMangas();
 
-      if (shouldNavigateToNextPage) {
+      if (this.shouldNavigateToNextPage) {
         this.navigateToNextPage();
       }
 
       console.log(`📊 Mangas escaneados: ${this.items.size}`);
-    }, this.DEFAULT_INTERVAL * timeInterval);
+    }, this.DEFAULT_INTERVAL * this.timeInterval);
   }
 
   scanNow(): void {
@@ -63,6 +52,10 @@ class MangaTracker extends BaseScraper<MangaTrackerConfig> {
 
   printStats(): void {
     console.log(`📈 Estadísticas: Total: ${this.items.size} mangas`);
+  }
+
+  getTrackerName(): string {
+    return 'MangaTracker';
   }
 
   // ====================================
@@ -153,4 +146,4 @@ class MangaTracker extends BaseScraper<MangaTrackerConfig> {
 }
 
 const mangaTracker = new MangaTracker(ikigai);
-mangaTracker.start(true); // Intervalo de 2 segundos, navegación automática activada
+mangaTracker.configure(true).start(); // Intervalo de 2 segundos, navegación automática activada
