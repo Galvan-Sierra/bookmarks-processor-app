@@ -8,13 +8,11 @@ import type { MangaTrackerConfig } from '@type/scraping';
 import { DOMHelper } from '@utils/dom';
 import { createDownloadLink } from '@utils/scraping-utils';
 
-const DEFAULT_INTERVAL = 1000; // 1 segundo
 const DEFAULT_PAGE = 1;
 
 class MangaTracker extends BaseScraper<MangaTrackerConfig> {
   private currentPage: number;
   private isNavigating = false;
-  private intervalId: NodeJS.Timeout | null = null;
 
   constructor(config: MangaTrackerConfig) {
     super(config);
@@ -46,7 +44,7 @@ class MangaTracker extends BaseScraper<MangaTrackerConfig> {
       }
 
       console.log(`📊 Mangas escaneados: ${this.items.size}`);
-    }, DEFAULT_INTERVAL * timeInterval);
+    }, this.DEFAULT_INTERVAL * timeInterval);
   }
 
   scanNow(): void {

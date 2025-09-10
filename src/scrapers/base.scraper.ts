@@ -7,6 +7,8 @@ export abstract class BaseScraper<
   TBookmark extends Bookmark = Bookmark
 > {
   protected items: Map<string, TBookmark> = new Map();
+  protected intervalId: NodeJS.Timeout | null = null;
+  protected DEFAULT_INTERVAL = 1000; // 1 second
 
   constructor(protected config: TConfig) {}
 
@@ -89,5 +91,13 @@ export abstract class BaseScraper<
     const blob = new Blob([jsonData], { type: 'application/json' });
     createDownloadLink(blob, `${this.config.pageName}.json`);
     console.log(`📁 Descargando ${accounts.length} cuentas`);
+  }
+
+  protected stop(): void {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
+      console.log('⏹️ MangaTracker detenido');
+    }
   }
 }
