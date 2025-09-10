@@ -126,7 +126,14 @@ class TwitterAccountTracker extends BaseScraper {
         console.log(`💾 Nueva cuenta ${folder}: ${title} (${href})`);
       }
 
-      DOMHelper.clickElement(element);
+      // if (this.mode === 'saved' && 'savedButton' in selectors) {
+      const saveButton = DOMHelper.querySelector(
+        this.savedSelectors.savedButton,
+        element
+      ) as HTMLButtonElement;
+
+      DOMHelper.clickElement(saveButton);
+      // }
     });
   }
 
