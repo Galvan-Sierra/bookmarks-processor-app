@@ -9,6 +9,7 @@ import type {
   ScanMode,
   TwitterBookmark,
   AccountStats,
+  twitterTrackerConfig,
 } from '@type/scraping';
 import type { BaseSelectors, TwitterSavedSelectors } from '@type/selectors';
 import { DOMHelper } from '@utils/dom';
@@ -34,10 +35,13 @@ class TwitterAccountTracker extends BaseScraper {
   }
 
   setupInterval(): void {
+    const selectors =
+      this.mode === 'follow' ? this.followSelectors : this.savedSelectors;
+
     const scanFunction =
       this.mode === 'follow'
-        ? () => this.scanFollowAccounts()
-        : () => this.scanSavedAccounts();
+        ? () => this.scanItems(selectors)
+        : () => this.scanItems(selectors);
 
     this.intervalId = setInterval(() => {
       scanFunction();
@@ -57,84 +61,37 @@ class TwitterAccountTracker extends BaseScraper {
     - Total: ${stats.total}`);
   }
 
-  private scanFollowAccounts(): void {
-    const list = DOMHelper.querySelector(this.followSelectors.list);
-
-    if (!list) return;
-
-    const accountElements = DOMHelper.querySelectorAll(
-      this.followSelectors.item,
-      list
-    );
-
-    this.processAccountElements(
-      accountElements,
-      this.followSelectors,
-      'follow'
-    );
-  }
-
-  private scanSavedAccounts(): void {
-    const list = DOMHelper.querySelector(this.savedSelectors.list);
-    if (!list) {
-      console.warn('⚠️ Lista de guardados no encontrada');
-      return;
-    }
-
-    const savedElements = list.querySelectorAll(this.savedSelectors.item);
-    const savedItems = Array.from(savedElements).slice(0, MAX_SAVED_BATCH);
-
-    if (savedItems.length === 0) {
-      console.warn('⚠️ No se encontraron elementos guardados');
-      return;
-    }
-
-    this.processSavedElements(savedItems, this.savedSelectors, 'saved');
-  }
-
-  private processAccountElements(
-    elements: NodeListOf<Element>,
-    selectors: BaseSelectors,
-    folder: TwitterBookmark['folder']
-  ): void {
-    elements.forEach((element) => {
-      const title = DOMHelper.extractCompleteText(element, selectors.title);
-      const href = DOMHelper.extractHref(element, selectors.href);
-
-      if (!this.itemExists(href)) {
-        this.addItem({ title, href, folder });
-        console.log(
-          `${
-            folder === 'follow' ? '👥' : '💾'
-          } Nueva cuenta ${folder}: ${title} (${href})`
-        );
-      }
-    });
-  }
-
-  private processSavedElements(
+  processItems(
     elements: Element[],
-    selectors: TwitterSavedSelectors,
-    folder: TwitterBookmark['folder']
+    selectors: BaseSelectors | TwitterSavedSelectors
   ): void {
-    elements.forEach((element) => {
-      const title = DOMHelper.extractCompleteText(element, selectors.title);
-      const href = DOMHelper.extractHref(element, selectors.href);
+    const folder = this.mode === 'follow' ? 'follow' : 'saved';
 
-      if (!this.itemExists(href)) {
-        this.addItem({ title, href, folder });
-        console.log(`💾 Nueva cuenta ${folder}: ${title} (${href})`);
+    if (this.mode === 'saved') {
+      {
+        elements = elements.slice(0, MAX_SAVED_BATCH);
       }
 
-      // if (this.mode === 'saved' && 'savedButton' in selectors) {
-      const saveButton = DOMHelper.querySelector(
-        this.savedSelectors.savedButton,
-        element
-      ) as HTMLButtonElement;
+      for (const element of elements) {
+        const title = DOMHelper.extractCompleteText(element, selectors.title);
+        const href = DOMHelper.extractHref(element, selectors.href);
 
-      DOMHelper.clickElement(saveButton);
-      // }
-    });
+        if (!this.itemExists(href)) {
+          this.addItem({ title, href, folder });
+
+          console.log(`💾 Nueva cuenta ${folder}: ${title} (${href})`);
+        }
+
+        if (this.mode === 'saved' && 'savedButton' in selectors) {
+          const saveButton = DOMHelper.querySelector(
+            selectors.savedButton,
+            element
+          ) as HTMLButtonElement;
+
+          DOMHelper.clickElement(saveButton);
+        }
+      }
+    }
   }
 
   private getAccountStats(): AccountStats {
@@ -164,4 +121,4 @@ const twitterTracker = new TwitterAccountTracker(
   SAVED_SELECTORS
 );
 
-twitterTracker.configure('follow').start();
+twitterTracker.configure('saved').start();

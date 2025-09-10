@@ -1,5 +1,6 @@
 import type { Bookmark } from '@type/bookmark';
 import type { BaseScraperConfig } from '@type/scraping';
+import { DOMHelper } from '@utils/dom';
 import { createDownloadLink } from '@utils/scraping-utils';
 
 export abstract class BaseScraper<
@@ -116,8 +117,18 @@ export abstract class BaseScraper<
     }
   }
 
+  protected scanItems(selectors: TConfig['selectors']): void {
+    const list = DOMHelper.querySelector(selectors.list);
+    if (!list) return;
+
+    const elements = DOMHelper.querySelectorAll(selectors.item, list);
+
+    this.processItems(Array.from(elements), selectors);
+  }
+
   // Métodos abstractos que implementan las subclases
   protected abstract configure(...args: any): this;
+  protected abstract processItems(...args: any): void;
   protected abstract setupInterval(): void;
   protected abstract getTrackerName(): string;
 

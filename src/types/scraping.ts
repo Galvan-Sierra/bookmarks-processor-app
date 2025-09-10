@@ -1,5 +1,9 @@
 import type { Bookmark } from '@type/bookmark';
-import type { BaseSelectors, MangaSelectors } from '@type/selectors';
+import type {
+  BaseSelectors,
+  MangaSelectors,
+  TwitterSavedSelectors,
+} from '@type/selectors';
 
 export interface BaseScraperConfig<T extends BaseSelectors = BaseSelectors> {
   pageName: string;
@@ -15,6 +19,10 @@ export interface NormalizeConfig {
   end: string;
 }
 
+export interface twitterTrackerConfig
+  extends BaseScraperConfig<TwitterSavedSelectors> {
+  savedSelectors: TwitterSavedSelectors;
+}
 export interface MangaTrackerConfig extends BaseScraperConfig {
   selectors: MangaSelectors;
   initialPage?: number;
