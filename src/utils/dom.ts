@@ -13,13 +13,13 @@ export class DOMHelper {
 
   static querySelectorAll(
     selector: string,
-    parent: Element | Document = document
-  ): Element[] {
+    parent: Element
+  ): NodeListOf<Element> {
     try {
-      return Array.from(parent.querySelectorAll(selector));
+      return parent.querySelectorAll(selector);
     } catch (error) {
       console.error(`Invalid selector: ${selector}`, error);
-      return [];
+      throw error;
     }
   }
 
@@ -71,7 +71,7 @@ export class DOMHelper {
       }
       return false;
     } catch (error) {
-      console.warn('Failed to click element:', error);
+      console.warn('❌ Failed to click element:', error);
       return false;
     }
   }

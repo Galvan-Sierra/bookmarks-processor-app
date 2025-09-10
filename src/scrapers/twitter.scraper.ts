@@ -6,7 +6,7 @@ import type {
   BaseScraperConfig,
 } from '@type/scraping';
 import type { BaseSelectors, TwitterSavedSelectors } from '@type/selectors';
-import { createDownloadLink } from '@utils/scraping-utils';
+import { DOMHelper } from '@utils/dom';
 
 // CONSTANTS
 
@@ -63,13 +63,15 @@ class TwitterAccountTracker extends BaseScraper {
 
   // PRIVATE SCANNING METHODS
   private scanFollowAccounts(): void {
-    const list = this.querySelector(this.followSelectors.list);
-    if (!list) {
-      console.warn('⚠️ Lista de follows no encontrada');
-      return;
-    }
+    const list = DOMHelper.querySelector(this.followSelectors.list);
 
-    const accountElements = list.querySelectorAll(this.followSelectors.item);
+    if (!list) return;
+
+    const accountElements = DOMHelper.querySelectorAll(
+      this.followSelectors.item,
+      list
+    );
+
     this.processAccountElements(
       accountElements,
       this.followSelectors,
@@ -78,7 +80,7 @@ class TwitterAccountTracker extends BaseScraper {
   }
 
   private scanSavedAccounts(): void {
-    const list = this.querySelector(this.savedSelectors.list);
+    const list = DOMHelper.querySelector(this.savedSelectors.list);
     if (!list) {
       console.warn('⚠️ Lista de guardados no encontrada');
       return;
@@ -101,10 +103,10 @@ class TwitterAccountTracker extends BaseScraper {
     folder: TwitterBookmark['folder']
   ): void {
     elements.forEach((element) => {
-      const title = this.extractCompleteText(element, selectors.title);
-      const href = this.extractHref(element, selectors.href);
+      const title = DOMHelper.extractCompleteText(element, selectors.title);
+      const href = DOMHelper.extractHref(element, selectors.href);
 
-      if (this.isValidAccountData(title, href) && !this.itemExists(href)) {
+      if (!this.itemExists(href)) {
         this.addItem({ title, href, folder });
         console.log(
           `${
@@ -121,90 +123,22 @@ class TwitterAccountTracker extends BaseScraper {
     folder: TwitterBookmark['folder']
   ): void {
     elements.forEach((element) => {
-      const title = this.extractCompleteText(element, selectors.title);
-      const href = this.extractHref(element, selectors.href);
+      const title = DOMHelper.extractCompleteText(element, selectors.title);
+      const href = DOMHelper.extractHref(element, selectors.href);
 
-      if (this.isValidAccountData(title, href) && !this.itemExists(href)) {
+      if (!this.itemExists(href)) {
         this.addItem({ title, href, folder });
         console.log(`💾 Nueva cuenta ${folder}: ${title} (${href})`);
       }
 
       // Intentar hacer click en el botón de guardar
-      this.clickSaveButton(element);
+      DOMHelper.clickElement(element);
     });
   }
 
-  // TEXT EXTRACTION METHODS
-  private extractCompleteText(element: Element, selector: string): string {
-    const targetElement = this.querySelector(selector, element);
-    if (!targetElement) return '';
-
-    return this.extractTextFromNode(targetElement);
-  }
-
-  private extractTextFromNode(node: Node): string {
-    let text = '';
-
-    for (const childNode of Array.from(node.childNodes)) {
-      if (childNode.nodeType === Node.TEXT_NODE) {
-        text += childNode.textContent || '';
-      } else if (childNode.nodeType === Node.ELEMENT_NODE) {
-        const element = childNode as Element;
-        text += this.extractTextFromElement(element);
-      }
-    }
-
-    return text.trim();
-  }
-
-  private extractTextFromElement(element: Element): string {
-    const tagName = element.tagName.toLowerCase();
-
-    switch (tagName) {
-      case 'img':
-        return element.getAttribute('alt') || '';
-      case 'span':
-        return this.extractTextFromNode(element);
-      default:
-        return element.textContent || '';
-    }
-  }
-
-  private extractHref(element: Element, selector: string): string {
-    return this.querySelector(selector, element)?.getAttribute('href') || '';
-  }
-
-  // HELPER METHODS
-  private querySelector(
-    selector: string,
-    parent: Element | Document = document
-  ): Element | null {
-    try {
-      return parent.querySelector(selector);
-    } catch (error) {
-      console.error(`Selector inválido: ${selector}`, error);
-      return null;
-    }
-  }
-
-  private clickSaveButton(element: Element): void {
-    try {
-      const saveButton = this.querySelector(
-        this.savedSelectors.savedButton,
-        element
-      ) as HTMLButtonElement;
-
-      if (saveButton) {
-        saveButton.click();
-      }
-    } catch (error) {
-      console.warn('❌ Botón de guardar no encontrado');
-    }
-  }
-
-  private isValidAccountData(title: string, href: string): boolean {
-    return Boolean(title?.trim() && href?.startsWith('/'));
-  }
+  // private isValidAccountData(title: string, href: string): boolean {
+  //   return Boolean(title?.trim() && href?.startsWith('/'));
+  // }
 
   private getAccountStats(): AccountStats {
     const accounts = this.getItems();
@@ -246,13 +180,7 @@ const SAVED_SELECTORS: TwitterSavedSelectors = {
 
 const TWITTER_CONFIG: BaseScraperConfig = {
   pageName: 'twitter accounts',
-  selectors: {
-    list: '#react-root > div > div > div.css-175oi2r.r-1f2l425.r-13qz1uu.r-417010.r-18u37iz > main > div > div > div > div > div > section > div > div',
-    item: 'div',
-    title:
-      'div > div > button > div > div.css-175oi2r.r-1iusvr4.r-16y2uox > div.css-175oi2r.r-1awozwy.r-18u37iz.r-1wtj0ep > div.css-175oi2r.r-1wbh5a2.r-dnmrzs.r-1ny4l3l > div > div.css-175oi2r.r-1wbh5a2.r-dnmrzs > a > div.css-175oi2r.r-1awozwy.r-18u37iz.r-dnmrzs > div.css-146c3p1.r-bcqeeo.r-1ttztb7.r-qvutc0.r-37j5jr.r-a023e6.r-rjixqe.r-b88u0q.r-1awozwy.r-6koalj.r-1udh08x.r-3s2u2q > span.css-1jxf684.r-dnmrzs.r-1udh08x.r-1udbk01.r-3s2u2q.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3',
-    href: 'div > div > button > div > div.css-175oi2r.r-1iusvr4.r-16y2uox > div.css-175oi2r.r-1awozwy.r-18u37iz.r-1wtj0ep > div.css-175oi2r.r-1wbh5a2.r-dnmrzs.r-1ny4l3l > div > div.css-175oi2r.r-1wbh5a2.r-dnmrzs > a',
-  },
+  selectors: FOLLOW_SELECTORS,
   normalizers: {
     href: {
       base: 'https://x.com',
