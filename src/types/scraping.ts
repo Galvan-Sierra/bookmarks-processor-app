@@ -15,10 +15,7 @@ export interface NormalizeConfig {
   end: string;
 }
 
-export interface MangaTrackerConfig {
-  pageName: string;
-  titleNormalize: NormalizeConfig;
-  urlNormalize: NormalizeConfig;
+export interface MangaTrackerConfig extends BaseScraperConfig {
   selectors: MangaSelectors;
   initialPage?: number;
 }
