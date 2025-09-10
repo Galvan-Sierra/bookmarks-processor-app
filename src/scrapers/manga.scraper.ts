@@ -75,7 +75,10 @@ class MangaTracker extends BaseScraper<MangaTrackerConfig> {
   }
 
   private navigateToNextPage(): void {
-    const nextPageUrl = this.config.selectors.nextPage(this.currentPage);
+    const nextPageUrl = this.config.nextPage
+      ? this.config.nextPage(this.currentPage)
+      : '';
+
     console.log(`🌊 Navegando a página ${this.currentPage + 1}...`);
 
     this.isNavigating = true;

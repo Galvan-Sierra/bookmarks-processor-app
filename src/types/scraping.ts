@@ -1,8 +1,4 @@
-import type {
-  BaseSelectors,
-  MangaSelectors,
-  TwitterSavedSelectors,
-} from '@type/selectors';
+import type { BaseSelectors, TwitterSavedSelectors } from '@type/selectors';
 
 export interface BaseScraperConfig<T extends BaseSelectors = BaseSelectors> {
   pageName: string;
@@ -25,6 +21,6 @@ export interface TwitterTrackerConfig extends BaseScraperConfig {
 // --- Manga Tracker Config ---
 
 export interface MangaTrackerConfig extends BaseScraperConfig {
-  selectors: MangaSelectors;
   initialPage?: number;
+  nextPage?: (currentPage: number) => string;
 }

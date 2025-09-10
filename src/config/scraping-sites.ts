@@ -35,8 +35,8 @@ export const ikigai: MangaTrackerConfig = {
     item: 'li',
     title: 'a > h3',
     href: 'a',
-    nextPage: (page: number) =>
-      `https://visualikigai.kloudytech.com//series/?pagina=${page}`,
   },
+  nextPage: (page: number) =>
+    `https://visualikigai.kloudytech.com//series/?pagina=${page}`,
   initialPage: 1,
 };

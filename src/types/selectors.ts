@@ -11,6 +11,3 @@ export interface TwitterSavedSelectors extends BaseSelectors {
 }
 
 // --- Manga Selectors ---
-export interface MangaSelectors extends BaseSelectors {
-  nextPage: (currentPage: number) => string;
-}
