@@ -60,6 +60,11 @@ class MangaTracker extends BaseScraper<MangaTrackerConfig> {
 
   // Métodos propios del MangaTracker
 
+  scanNow(): void {
+    console.log('🔍 Iniciando escaneo manual...');
+    this.scanItems(this.config.selectors);
+  }
+
   printStats(): void {
     console.log(`📈 Estadísticas: Total: ${this.items.size} mangas`);
   }
