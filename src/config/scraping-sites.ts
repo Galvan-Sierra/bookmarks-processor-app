@@ -1,6 +1,6 @@
 import type { MangaTrackerConfig, TwitterTrackerConfig } from '@type/scraping';
 
-export const TWITTER_CONFIG: TwitterTrackerConfig = {
+const twitter: TwitterTrackerConfig = {
   pageName: 'twitter accounts',
   selectors: {
     list: '#react-root > div > div > div.css-175oi2r.r-1f2l425.r-13qz1uu.r-417010.r-18u37iz > main > div > div > div > div > div > section > div > div',
@@ -24,7 +24,7 @@ export const TWITTER_CONFIG: TwitterTrackerConfig = {
   },
 };
 
-export const ikigai: MangaTrackerConfig = {
+const ikigaiMangas: MangaTrackerConfig = {
   pageName: 'ikigai manga',
   normalizers: {
     title: { base: '', end: ' | Ikigai Mangas' },
@@ -41,7 +41,7 @@ export const ikigai: MangaTrackerConfig = {
   initialPage: 1,
 };
 
-export const mhScan: MangaTrackerConfig = {
+const mhScanMangas: MangaTrackerConfig = {
   pageName: 'mhScan manga',
   normalizers: {},
   selectors: {
@@ -53,7 +53,7 @@ export const mhScan: MangaTrackerConfig = {
   },
 };
 
-export const lectorKnight: MangaTrackerConfig = {
+const knightMangas: MangaTrackerConfig = {
   pageName: 'lectorknight',
   normalizers: {
     title: { base: '', end: ' - Lector KNS' },
@@ -69,7 +69,7 @@ export const lectorKnight: MangaTrackerConfig = {
   initialPage: 1,
 };
 
-export const plotTwistManga: MangaTrackerConfig = {
+const plotTwistMangas: MangaTrackerConfig = {
   pageName: 'plot twist manga',
   normalizers: {
     title: { base: '', end: ' - Plot Twist No Fansub' },
@@ -82,7 +82,7 @@ export const plotTwistManga: MangaTrackerConfig = {
   },
 };
 
-export const ravenMangas: MangaTrackerConfig = {
+const ravenMangas: MangaTrackerConfig = {
   pageName: 'raven mangas',
   normalizers: {
     title: { base: '', end: ' | Raven series' },
@@ -96,4 +96,13 @@ export const ravenMangas: MangaTrackerConfig = {
   },
   nextPage: (page) => `https://ravensword.lat/comics?page=${page}`,
   initialPage: 1,
+};
+
+export const SITES_CONFIG = {
+  twitter,
+  ikigaiMangas,
+  mhScanMangas,
+  knightMangas,
+  plotTwistMangas,
+  ravenMangas,
 };

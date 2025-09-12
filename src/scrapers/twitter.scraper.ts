@@ -1,4 +1,4 @@
-import { TWITTER_CONFIG } from '@config/scraping-sites';
+import { SITES_CONFIG } from '@config/scraping-sites';
 import { BaseScraper } from '@scrapers/base.scraper';
 import { DOMHelper } from '@utils/dom';
 
@@ -121,5 +121,5 @@ class TwitterAccountTracker extends BaseScraper<TwitterTrackerConfig> {
   }
 }
 
-const twitterTracker = new TwitterAccountTracker(TWITTER_CONFIG);
+const twitterTracker = new TwitterAccountTracker(SITES_CONFIG.twitter);
 twitterTracker.configure('FOLLOW').start();

@@ -1,4 +1,4 @@
-import { ikigai } from '@config/scraping-sites';
+import { SITES_CONFIG } from '@config/scraping-sites';
 import { BaseScraper } from '@scrapers/base.scraper';
 import type { Bookmark } from '@type/bookmark';
 import type { MangaTrackerConfig } from '@type/scraping';
@@ -122,5 +122,5 @@ class MangaTracker extends BaseScraper<MangaTrackerConfig> {
   }
 }
 
-const mangaTracker = new MangaTracker(ikigai);
+const mangaTracker = new MangaTracker(SITES_CONFIG.ikigaiMangas);
 mangaTracker.configure(1, true).start();
