@@ -52,3 +52,48 @@ export const mhScan: MangaTrackerConfig = {
     href: 'div.col-8.col-md-10 > div.tab-summary > div.post-title > h3 > a',
   },
 };
+
+export const lectorKnight: MangaTrackerConfig = {
+  pageName: 'lectorknight',
+  normalizers: {
+    title: { base: '', end: ' - Lector KNS' },
+    href: { base: '', end: '/' },
+  },
+  selectors: {
+    list: 'body > div.wrap > div > div.site-content > div.c-page-content.style-1 > div > div > div > div > div.main-col-inner > div > div.c-page__content > div.tab-content-wrap > div',
+    item: '.manga__item ',
+    title: 'div.manga__content > div > div > h2 > a',
+    href: 'div.manga__content > div > div > h2 > a',
+  },
+  nextPage: (page) => `https://lectorknight.com/biblioteca/page/${page}`,
+  initialPage: 1,
+};
+
+export const plotTwistManga: MangaTrackerConfig = {
+  pageName: 'plot twist manga',
+  normalizers: {
+    title: { base: '', end: ' - Plot Twist No Fansub' },
+  },
+  selectors: {
+    list: '#tdi_52',
+    item: 'div',
+    title: 'div > div.td-module-meta-info > h2',
+    href: 'div > div.td-module-meta-info > h2 > a',
+  },
+};
+
+export const ravenMangas: MangaTrackerConfig = {
+  pageName: 'raven mangas',
+  normalizers: {
+    title: { base: '', end: ' | Raven series' },
+  },
+  selectors: {
+    list: '#projectsDiv',
+    item: 'figure',
+    title:
+      'div.absolute-b-left.w-full.py-2.px-1.md\\:px-2.rounded-inherit.text-center.flex.flex-col.gap-2 > a > figcaption',
+    href: 'a',
+  },
+  nextPage: (page) => `https://ravensword.lat/comics?page=${page}`,
+  initialPage: 1,
+};
