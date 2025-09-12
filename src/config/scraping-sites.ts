@@ -42,7 +42,7 @@ const ikigaiMangas: MangaTrackerConfig = {
 };
 
 const mhScanMangas: MangaTrackerConfig = {
-  pageName: 'mhScan manga',
+  pageName: 'mhscan manga',
   normalizers: {},
   selectors: {
     list: 'body > div.wrap > div > div.site-content > div.c-page-content > div > div > div > div > div > div > div.c-page__content > div > div',
@@ -54,7 +54,7 @@ const mhScanMangas: MangaTrackerConfig = {
 };
 
 const knightMangas: MangaTrackerConfig = {
-  pageName: 'lectorknight',
+  pageName: 'lector knight',
   normalizers: {
     title: { base: '', end: ' - Lector KNS' },
     href: { base: '', end: '/' },
