@@ -1,4 +1,10 @@
-import type { OlympusList, Serie } from '@type/olympus';
+import type {
+  ChapterList,
+  Datum,
+  ExtractedChapterData,
+  OlympusList,
+  Serie,
+} from '@type/olympus';
 
 export class OlympusParser {
   parseSeries(content: OlympusList): Serie[] {
@@ -12,5 +18,13 @@ export class OlympusParser {
         slug,
       };
     });
+  }
+
+  parseChapters(data: ChapterList): ExtractedChapterData[] {
+    return data.data.map((chapter: Datum) => ({
+      id: chapter.id,
+      chapter: parseInt(chapter.name),
+      last_page: data.meta.last_page,
+    }));
   }
 }

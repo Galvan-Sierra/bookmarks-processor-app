@@ -1,11 +1,13 @@
 import { DEFAULT_OUTPUT_PATH } from '@config/constants';
 import { HtmlParser } from '@parsers/html-parser';
 import { BookmarkService } from '@services/bookmark.service';
+import { OlympusService } from '@services/olympus.service';
 import type { Bookmark, SearchOptions } from '@type/bookmark';
 import { FileHandler } from '@utils/file-handler';
 
 export class BookmarkManager {
   private bookmarkService = new BookmarkService();
+  private olympusService = new OlympusService();
   private fileHandler = new FileHandler();
   private parser = new HtmlParser();
 
@@ -133,6 +135,23 @@ export class BookmarkManager {
 
   orderBookmarksByDomain(): void {
     this.bookmarkService.orderByDomain();
+  }
+
+  async updateOlympusMangasBookmarks(): Promise<void> {
+    const series = this.bookmarkService.extractBy({
+      includeWords: 'olympusbiblioteca.com/series/',
+      searchInHref: true,
+    });
+
+    const chapter = this.bookmarkService.extractBy({
+      includeWords: 'olympusbiblioteca.com/capitulo/',
+      searchInHref: true,
+    });
+
+    const updatedMangas = await this.olympusService.updateAll(series, chapter);
+
+    this.bookmarkService.add(updatedMangas);
+    // this.bookmarkService.();
   }
 
   private validateBookmarksLoaded(): void {

@@ -12,7 +12,7 @@ const mangas = mangasFile.findBookmarksBy({
   includeWords: ['olympusbiblioteca.com/capitulo'],
 });
 
-const olympusChapters = await olympusPage.getMangaData(mangas);
+const olympusChapters = await olympusPage.updateChapters(mangas);
 
 const parseOlympus: Bookmark[] = olympusChapters.map((serie) => ({
   title: serie.title,
