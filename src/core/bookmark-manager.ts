@@ -116,6 +116,11 @@ export class BookmarkManager {
     return extracted;
   }
 
+  clearBookmarks(): void {
+    this.bookmarkService.clear();
+    console.log('🗑️ Bookmarks cleared');
+  }
+
   deleteBookmarks(bookmarksToDelete: Bookmark[]): void {
     const initialCount = this.bookmarkService.getAll().length;
 
