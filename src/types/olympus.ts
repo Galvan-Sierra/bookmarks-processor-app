@@ -1,3 +1,5 @@
+import type { Bookmark } from '@type/bookmark';
+
 export interface OlympusList {
   data: Data;
 }
@@ -151,3 +153,9 @@ export interface ExtractedChapterData {
   id: number;
   last_page: number;
 }
+
+export interface Serie extends Bookmark {
+  slug: string;
+}
+
+export type OldSerie = { title: string; url: string; slug: string };

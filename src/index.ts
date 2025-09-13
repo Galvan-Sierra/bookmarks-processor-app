@@ -6,7 +6,7 @@ const mangasFile = new BookmarkManager('data/input/mangas.html');
 await mangasFile.readBookmarks();
 
 const olympusPage = new OlympusService();
-const olympusSeries = await olympusPage.getSeriesData();
+const olympusSeries = await olympusPage.getSeries();
 
 const mangas = mangasFile.findBookmarksBy({
   includeWords: ['olympusbiblioteca.com/capitulo'],

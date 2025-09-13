@@ -1,58 +1,54 @@
+import { OlympusParser } from '@parsers/olympus-parser';
 import type { Bookmark } from '@type/bookmark';
 import type {
   OlympusList,
   Datum,
   ChapterList,
   ExtractedChapterData,
+  OldSerie,
+  Serie,
 } from '@type/olympus';
 
-type Serie = { title: string; url: string; slug: string };
-
 export class OlympusService {
-  private list: Serie[] = [];
-  async getSeriesData(): Promise<Serie[]> {
+  private list: OldSerie[] = [];
+  private series: Serie[] = [];
+
+  private parser = new OlympusParser();
+
+  async getSeries(): Promise<void> {
     const series: Serie[] = [];
 
-    const firstQuest: OlympusList = await fetch(this.getSeriesApiUrl()).then(
-      (response) => response.json()
-    );
+    if (this.isRunning()) return;
 
-    console.log(firstQuest);
-    series.push(...this.formatData(firstQuest));
+    let page = 1;
+    let hasNextPage = true;
 
-    // .then((response) => response.json());
-    for (let i = 2; i <= firstQuest.data.series.last_page; i++) {
-      const pageData = await fetch(this.getSeriesApiUrl(i)).then((response) =>
-        response.json()
-      );
+    while (hasNextPage) {
+      const response = await fetch(this.getSeriesUrl(page));
+      const data = await response.json();
 
-      series.push(...this.formatData(pageData));
+      const parsedSeries = this.parser.parseSeries(data);
+      series.push(...parsedSeries);
+
+      hasNextPage = data.data.series.last_page > page;
+      page++;
     }
 
-    this.list = series;
-    return series;
+    this.series = series;
   }
 
-  private getSeriesApiUrl(page: number = 1): string {
-    return `https://olympusbiblioteca.com/api/series?page=${page}&direction=asc&type=comic`;
-  }
+  updateSeries(bookmarks: Bookmark[]): Bookmark[] {
+    // validar si están cargados del api
+    if (!this.isRunning()) this.getSeries();
 
-  private formatData(content: OlympusList) {
-    const data = this.extractSeriesData(content);
-
-    return data.map((datum) => {
-      return {
-        title: datum.title + ' | Olympus Scanlation',
-        url: 'https://olympusbiblioteca.com/series/comic-' + datum.slug,
-        slug: datum.slug,
-      };
+    // actualizar la information, buscando por titulo normalizado
+    const updatedBookmarks = bookmarks.map((bookmark) => {
+      const serie = this.series.find((serie) => serie.title === bookmark.title);
+      if (serie) bookmark.href = serie.href;
+      return bookmark;
     });
-  }
-  private extractSeriesData(welcomeData: OlympusList) {
-    return welcomeData.data.series.data.map((datum: Datum) => ({
-      title: datum.name,
-      slug: datum.slug,
-    }));
+
+    return updatedBookmarks;
   }
 
   private getChapterApiUrl(slug: string, page: number = 1): string {
@@ -154,5 +150,13 @@ export class OlympusService {
       id: chapter.id,
       last_page: chapterList.meta.last_page, // last_page está en meta, no en cada capítulo
     }));
+  }
+
+  private getSeriesUrl(page: number): string {
+    return `https://olympusbiblioteca.com/api/series?page=${page}&direction=asc&type=comic`;
+  }
+
+  private isRunning(): boolean {
+    return this.series.length > 0;
   }
 }
