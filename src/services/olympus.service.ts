@@ -10,10 +10,15 @@ export class OlympusService {
     series: Bookmark[],
     chapters: Bookmark[]
   ): Promise<Bookmark[]> {
+    await this.getSeries();
+
     const updatedSeries = this.updateSeries(series);
     const updatedChapters = await this.updateChapters(chapters);
 
-    return [updatedChapters, updatedSeries].flat();
+    console.log('Updated series:', updatedSeries.length);
+    console.log('Updated chapters:', updatedChapters.length);
+
+    return [updatedSeries, updatedChapters].flat();
   }
 
   async getSeries(): Promise<void> {
@@ -39,10 +44,6 @@ export class OlympusService {
   }
 
   updateSeries(bookmarks: Bookmark[]): Bookmark[] {
-    // validar si están cargados del api
-    if (!this.isRunning()) this.getSeries();
-
-    // actualizar la information, buscando por titulo normalizado
     const updatedBookmarks = bookmarks.map((bookmark) => {
       const serie = this.series.find((serie) => serie.title === bookmark.title);
 

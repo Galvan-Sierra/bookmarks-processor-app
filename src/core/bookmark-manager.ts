@@ -140,15 +140,26 @@ export class BookmarkManager {
   async updateOlympusMangasBookmarks(): Promise<void> {
     const series = this.bookmarkService.extractBy({
       includeWords: 'olympusbiblioteca.com/series/',
+      searchInTitle: false,
       searchInHref: true,
     });
 
-    const chapter = this.bookmarkService.extractBy({
+    const chapters = this.bookmarkService.extractBy({
       includeWords: 'olympusbiblioteca.com/capitulo/',
+      searchInTitle: false,
       searchInHref: true,
     });
 
-    const updatedMangas = await this.olympusService.updateAll(series, chapter);
+    if (series.length === 0 || chapters.length === 0) {
+      console.warn('No se encontraron series o capítulos para actualizar.');
+      return;
+    }
+
+    console.log(
+      `Actualizando ${series.length} series y ${chapters.length} capítulos`
+    );
+
+    const updatedMangas = await this.olympusService.updateAll(series, chapters);
 
     this.bookmarkService.add(updatedMangas);
     // this.bookmarkService.();
