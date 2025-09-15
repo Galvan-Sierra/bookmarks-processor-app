@@ -57,18 +57,23 @@ export abstract class BaseScraper<
     });
   }
 
-  protected addItems(...items: TBookmark[]): void {
+  protected addItems(...items: (TBookmark | TBookmark[])[]): void {
+    const flatItems = items
+      .flat()
+      .filter((item): item is TBookmark => !!item && !Array.isArray(item));
+
     let addedCount = 0;
 
-    for (const item of items) {
+    for (const item of flatItems) {
       if (!this.itemExists(item.href)) {
         this.addItem(item);
         addedCount++;
       }
     }
 
-    if (addedCount > 0)
+    if (addedCount > 0) {
       console.log(`📥 ${addedCount} cuentas añadidas manualmente`);
+    }
   }
 
   protected getItems(): TBookmark[] {
